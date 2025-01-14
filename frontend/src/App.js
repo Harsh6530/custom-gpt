@@ -3,9 +3,10 @@ import './css/App.css';
 
 const App = () => {
     const [prompts, setPrompts] = useState([]);
-    const [filledPromptsWithProjects, setFilledPromptsWithProjects] = useState([]); // Ensure this is initialized as an array
+    const [filledPromptsWithProjects, setFilledPromptsWithProjects] = useState([]);
     const [promptFile, setPromptFile] = useState(null);
     const [tagFile, setTagFile] = useState(null);
+    const [downloadLinks, setDownloadLinks] = useState([]);
 
     const handlePromptFileChange = (e) => {
         setPromptFile(e.target.files[0]);
@@ -26,7 +27,7 @@ const App = () => {
             body: formData,
         })
             .then((response) => response.json())
-            .then((data) => setPrompts(data.prompts || [])) // Default to empty array if undefined
+            .then((data) => setPrompts(data.prompts || []))
             .catch((error) => console.error('Error uploading prompt file:', error));
     };
 
@@ -42,10 +43,30 @@ const App = () => {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log('Response from backend:', data); // Debugging: Log the backend response
-                setFilledPromptsWithProjects(data.filledPromptsWithProjects || []); // Default to empty array if undefined
+                console.log('Response from backend:', data);
+                setFilledPromptsWithProjects(data.filledPromptsWithProjects || []);
             })
             .catch((error) => console.error('Error uploading tag file:', error));
+    };
+
+    const handleGenerateResponses = () => {
+        fetch('http://localhost:5000/api/generate-responses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filledPromptsWithProjects }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Generated files:', data.projectFiles);
+                setDownloadLinks(data.projectFiles || []);
+            })
+            .catch((error) => console.error('Error generating responses:', error));
+    };
+
+    const handleDownload = (fileName) => {
+        const link = document.createElement('a');
+        link.href = `http://localhost:5000/api/download/${encodeURIComponent(fileName)}`;
+        link.click();
     };
 
     return (
@@ -62,26 +83,47 @@ const App = () => {
                 <button onClick={handleUploadTags}>Upload Tags</button>
 
                 <h2>Extracted Prompts</h2>
-                <ul>
-                    {prompts.map((prompt, index) => (
-                        <li key={index}>{prompt}</li>
-                    ))}
-                </ul>
+                {Array.isArray(prompts) && prompts.length > 0 ? (
+                    <ul>
+                        {prompts.map((prompt, index) => (
+                            <li key={index}>{prompt}</li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>No prompts uploaded yet.</p>
+                )}
 
                 <h2>Filled Prompts with Project Names</h2>
-                {filledPromptsWithProjects.length === 0 && (
+                {Array.isArray(filledPromptsWithProjects) && filledPromptsWithProjects.length > 0 ? (
+                    filledPromptsWithProjects.map((project, index) => (
+                        <div key={index} className="project-section">
+                            <h3>Project: {project.projectName || 'Unknown Project'}</h3>
+                            <ul>
+                                {(project.filledPrompts || []).map((prompt, promptIndex) => (
+                                    <li key={promptIndex}>{prompt}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))
+                ) : (
                     <p>No filled prompts available. Please upload a valid tags file.</p>
                 )}
-                {filledPromptsWithProjects.map((project, index) => (
-                    <div key={index} className="project-section">
-                        <h3>Project: {project.projectName || 'Unknown Project'}</h3> {/* Ensure projectName is safe */}
-                        <ul>
-                            {(project.filledPrompts || []).map((prompt, promptIndex) => ( // Default to empty array
-                                <li key={promptIndex}>{prompt}</li>
-                            ))}
-                        </ul>
-                    </div>
-                ))}
+
+                <h2>Step 3: Generate Responses</h2>
+                <button onClick={handleGenerateResponses}>Generate Responses</button>
+
+                <h2>Download Word Files</h2>
+                {Array.isArray(downloadLinks) && downloadLinks.length > 0 ? (
+                    downloadLinks.map((file, index) => (
+                        <div key={index}>
+                            <button onClick={() => handleDownload(file.filePath.split('/').pop())}>
+                                Download {file.projectName}
+                            </button>
+                        </div>
+                    ))
+                ) : (
+                    <p>No files available for download. Generate responses first.</p>
+                )}
             </header>
         </div>
     );
