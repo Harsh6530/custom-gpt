@@ -1,127 +1,90 @@
-import React, { useState } from "react";
-import axios from "axios";
-import "./css/App.css"; // Importing the CSS file
+import React, { useState } from 'react';
+import './css/App.css';
 
 const App = () => {
-  const [promptsFile, setPromptsFile] = useState(null);
-  const [tagsFile, setTagsFile] = useState(null);
-  const [parsedProjects, setParsedProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
+    const [prompts, setPrompts] = useState([]);
+    const [filledPromptsWithProjects, setFilledPromptsWithProjects] = useState([]); // Ensure this is initialized as an array
+    const [promptFile, setPromptFile] = useState(null);
+    const [tagFile, setTagFile] = useState(null);
 
-  const uploadFile = async (file, endpoint) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await axios.post(`http://localhost:5000/${endpoint}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    return response.data;
-  };
+    const handlePromptFileChange = (e) => {
+        setPromptFile(e.target.files[0]);
+    };
 
-  const handlePromptsUpload = async () => {
-    if (promptsFile) {
-      setLoading(true);
-      try {
-        const data = await uploadFile(promptsFile, "upload-prompts");
-        console.log("Prompts uploaded:", data);
-      } catch (error) {
-        console.error("Error uploading prompts:", error);
-      }
-      setLoading(false);
-    }
-  };
+    const handleTagFileChange = (e) => {
+        setTagFile(e.target.files[0]);
+    };
 
-  const handleTagsUpload = async () => {
-    if (tagsFile) {
-      setLoading(true);
-      try {
-        const data = await uploadFile(tagsFile, "upload-tags");
-        console.log("Parsed Projects Response:", data);
-        setParsedProjects(data.parsedProjects);
-      } catch (error) {
-        console.error("Error uploading tags:", error);
-      }
-      setLoading(false);
-    }
-  };
+    const handleUploadPrompts = () => {
+        if (!promptFile) return alert('Please select a prompt file first.');
 
-  const handleGenerateResponses = async (projectName, promptIndex) => {
-    setLoading(true);
-    try {
-      const selectedPrompt = parsedProjects
-        .find((project) => project.projectName === projectName)
-        .parsedPrompts[promptIndex];
+        const formData = new FormData();
+        formData.append('file', promptFile);
 
-      const response = await axios.post("http://localhost:5000/generate-responses", {
-        prompts: [selectedPrompt.parsedPrompt],
-      });
+        fetch('http://localhost:5000/api/upload-prompts', {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => setPrompts(data.prompts || [])) // Default to empty array if undefined
+            .catch((error) => console.error('Error uploading prompt file:', error));
+    };
 
-      setParsedProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project.projectName === projectName
-            ? {
-                ...project,
-                parsedPrompts: project.parsedPrompts.map((p, i) =>
-                  i === promptIndex ? { ...p, response: response.data.responses[0].response } : p
-                ),
-              }
-            : project
-        )
-      );
+    const handleUploadTags = () => {
+        if (!tagFile) return alert('Please select a tag file first.');
 
-      console.log(`Response for ${projectName} - Prompt ${promptIndex}:`, response.data.responses);
-    } catch (error) {
-      console.error("Error generating response:", error);
-    }
-    setLoading(false);
-  };
+        const formData = new FormData();
+        formData.append('file', tagFile);
 
-  return (
-    <div className="container">
-      <h1>Custom GPT Prompt Manager</h1>
+        fetch('http://localhost:5000/api/upload-tags', {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Response from backend:', data); // Debugging: Log the backend response
+                setFilledPromptsWithProjects(data.filledPromptsWithProjects || []); // Default to empty array if undefined
+            })
+            .catch((error) => console.error('Error uploading tag file:', error));
+    };
 
-      <div className="file-upload">
-        <h2>Upload Prompts File</h2>
-        <input type="file" onChange={(e) => setPromptsFile(e.target.files[0])} />
-        <button onClick={handlePromptsUpload} disabled={loading}>
-          {loading ? "Uploading..." : "Upload Prompts"}
-        </button>
-      </div>
+    return (
+        <div className="App">
+            <header className="App-header">
+                <h1>Upload Excel Files</h1>
 
-      <div className="file-upload">
-        <h2>Upload Tags File</h2>
-        <input type="file" onChange={(e) => setTagsFile(e.target.files[0])} />
-        <button onClick={handleTagsUpload} disabled={loading}>
-          {loading ? "Uploading..." : "Upload Tags"}
-        </button>
-      </div>
+                <h2>Step 1: Upload Prompt File</h2>
+                <input type="file" accept=".xlsx, .xls" onChange={handlePromptFileChange} />
+                <button onClick={handleUploadPrompts}>Upload Prompts</button>
 
-      <div className="projects">
-        <h2>Parsed Projects and Prompts</h2>
-        {parsedProjects.length > 0 ? (
-          parsedProjects.map((project) => (
-            <div key={project.projectName} className="project">
-              <h3>Project: {project.projectName}</h3>
-              {project.parsedPrompts.map((prompt, index) => (
-                <div key={index} className="prompt">
-                  <strong>Original:</strong> {prompt.Prompt} <br />
-                  <strong>Parsed:</strong> {prompt.parsedPrompt} <br />
-                  <strong>Response:</strong> {prompt.response || "Pending..."} <br />
-                  <button
-                    onClick={() => handleGenerateResponses(project.projectName, index)}
-                    disabled={loading}
-                  >
-                    {loading ? "Generating..." : "Generate Response"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          ))
-        ) : (
-          <p>No projects found. Please upload valid files.</p>
-        )}
-      </div>
-    </div>
-  );
+                <h2>Step 2: Upload Tag File</h2>
+                <input type="file" accept=".xlsx, .xls" onChange={handleTagFileChange} />
+                <button onClick={handleUploadTags}>Upload Tags</button>
+
+                <h2>Extracted Prompts</h2>
+                <ul>
+                    {prompts.map((prompt, index) => (
+                        <li key={index}>{prompt}</li>
+                    ))}
+                </ul>
+
+                <h2>Filled Prompts with Project Names</h2>
+                {filledPromptsWithProjects.length === 0 && (
+                    <p>No filled prompts available. Please upload a valid tags file.</p>
+                )}
+                {filledPromptsWithProjects.map((project, index) => (
+                    <div key={index} className="project-section">
+                        <h3>Project: {project.projectName || 'Unknown Project'}</h3> {/* Ensure projectName is safe */}
+                        <ul>
+                            {(project.filledPrompts || []).map((prompt, promptIndex) => ( // Default to empty array
+                                <li key={promptIndex}>{prompt}</li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </header>
+        </div>
+    );
 };
 
 export default App;
