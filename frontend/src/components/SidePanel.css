@@ -1,0 +1,103 @@
+.side-panel {
+    width: 300px;
+    background-color: #000000; /* Dark sidebar background */
+    color: #ffffff; /* White text */
+    padding: 15px;
+    height: 100vh; /* Full height */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Allow scrolling for overflow */
+    margin: 40px 0;
+}
+
+.side-panel-heading {
+    font-size: 1rem; /* Slightly smaller font size for heading text */
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #eaeaea; /* Slightly lighter text color */
+}
+
+
+
+.project-list {
+    flex: 1; /* Take available space */
+    overflow-y: auto; /* Scrollable project list */
+    margin-bottom: 20px;
+}
+
+.project-item {
+    padding: 10px;
+    margin: 8px 0;
+    background-color: #3b3b3b; /* Slightly lighter background */
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    font-size: 0.9rem;
+}
+
+.project-item:hover {
+    background-color: #4a4a4a; /* Highlight on hover */
+    transform: translateY(-2px); /* Lift effect */
+}
+
+.add-project-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.001px;
+    margin-top: 15px;
+    margin-bottom: 65px;
+}
+
+
+.project-input {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #444; /* Dark border */
+    background-color: #2b2b2b; /* Input background */
+    color: #eaeaea; /* Input text color */
+    outline: none;
+    transition: border-color 0.3s, background-color 0.3s;
+    font-size: 0.9rem;
+}
+
+.project-input:focus {
+    border-color: #4caf50; /* Green border on focus */
+    background-color: #333333; /* Slightly lighter on focus */
+}
+
+.add-project-button {
+    padding: 10px 15px;
+    background-color: #4caf50; /* Green button */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-project-button:hover {
+    background-color: #45a049; /* Darker green */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.add-project-button:active {
+    background-color: #39843c; /* Even darker on click */
+}
+
+/* Add scrollbar styling */
+.side-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.side-panel::-webkit-scrollbar-thumb {
+    background-color: #4a4a4a; /* Scrollbar thumb color */
+    border-radius: 4px;
+}
+
+.side-panel::-webkit-scrollbar-thumb:hover {
+    background-color: #616161; /* Slightly lighter on hover */
+}

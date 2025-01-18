@@ -1,0 +1,137 @@
+/* Global Styles */
+
+
+.app-container {
+    display: flex;
+    height: 100vh; /* Full height of the screen */
+    overflow: hidden;
+    color: #eaeaea;
+}
+
+.static-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #242424;
+    color: white;
+    padding: 10px 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.header-project-name {
+    font-size: 1rem;
+    color: #c0c0c0;
+    position: absolute;
+    top: 50%;
+    left: 88%;
+    transform: translate(-50%, -50%);
+}
+
+
+.project-header {
+    margin: 40px 0;
+}
+
+.project-header h2 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #eaeaea;
+}
+
+input[type="file"] {
+    display: block;
+    margin: 15px 0;
+    font-size: 0.9rem;
+    padding: 12px;
+    border: 1px solid #555;
+    border-radius: 8px;
+    background: #2b2b2b;
+    color: #eaeaea;
+    cursor: pointer;
+    max-width: 350px;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #4caf50; /* Green button */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 10px;
+  }
+
+button:hover {
+    background-color: #45a049; /* Darker green */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+input[type="file"]:hover {
+    border-color: #4caf50;
+    background: #333333;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: px 0;
+}
+
+li {
+    background: #2b2b2b;
+    color: #25ae18;
+    margin: 10px 0;
+    padding: 10px 18px;
+    border: 1px solid #555;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    word-wrap: break-word;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+li:hover {
+    background: #333333;
+    transform: translateY(-2px);
+}
+
+p {
+    color: #eaeaea;
+    font-size: 1rem;
+}
+
+/* Add responsiveness */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+
+    .side-panel {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #444;
+    }
+
+    .main-content {
+        flex: unset;
+        height: auto;
+    }
+
+    button {
+        width: 100%;
+    }
+}

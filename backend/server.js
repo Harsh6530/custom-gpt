@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const multer = require('multer');
 const xlsx = require('xlsx');
 const { OpenAI } = require('openai');
@@ -7,9 +8,12 @@ const { Document, Packer, Paragraph, TextRun } = require('docx');
 const fs = require('fs');
 const app = express();
 const PORT = 5000;
+const Project = require('./models/Project');
 
 // Load environment variables from .env file
 require('dotenv').config();
+
+
 
 // Middleware
 app.use(cors());
@@ -21,49 +25,128 @@ const upload = multer({ dest: 'uploads/' });
 let prompts = []; // Store uploaded prompts
 let filledPromptsWithProjects = [];
 
+mongoose
+    .connect('mongodb+srv://sharmaharsh634:rajesh530@cluster0.jtsxc.mongodb.net/project_name_prompts?retryWrites=true&w=majority&appName=Cluster0')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(error => console.error('Error connecting to MongoDB:', error));
+
+
 // OpenAI Configuration
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Route to upload Excel file and extract prompts
-app.post('/api/upload-prompts', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send({ error: 'No file uploaded.' });
+app.post('/api/upload-prompts', upload.single('file'), async (req, res) => {
+    if (!req.file || !req.body.projectName) {
+        return res.status(400).send({ error: 'Project name or file is missing.' });
     }
 
+    console.log('API request received');
+    console.log('Uploaded file:', req.file);
+    console.log('Project Name:', req.body.projectName);
+
     try {
+        const { projectName } = req.body;
+
+        // Read the uploaded file
         const workbook = xlsx.readFile(req.file.path);
         const sheetName = workbook.SheetNames[0];
         const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        prompts = sheetData.map(row => row.Prompt);
+        // Extract prompts from the file
+        const newPrompts = sheetData.map((row) => row.Prompt).filter(Boolean); // Filter out empty values
+        console.log('Extracted Prompts:', newPrompts);
 
-        res.json({ prompts });
+        if (newPrompts.length === 0) {
+            return res.status(400).json({ error: 'No prompts found in the uploaded file.' });
+        }
+
+        // Check if the project already exists
+        let project = await Project.findOne({ projectName });
+        if (project) {
+            console.log('Project already exists:', project);
+
+            // Filter out prompts that already exist
+            const uniquePrompts = newPrompts.filter((prompt) => !project.prompts.includes(prompt));
+            console.log('Unique Prompts:', uniquePrompts);
+
+            if (uniquePrompts.length === 0) {
+                return res.status(200).json({
+                    message: 'All prompts are already uploaded.',
+                    prompts: project.prompts,
+                });
+            }
+
+            // Add unique prompts to the existing project
+            project.prompts.push(...uniquePrompts);
+        } else {
+            // Create a new project
+            console.log('Creating a new project...');
+            project = new Project({ projectName, prompts: newPrompts });
+        }
+
+        // Save the project to the database
+        await project.save();
+        console.log('Project saved successfully.');
+
+        res.status(200).json({
+            message: 'Prompts uploaded successfully.',
+            prompts: project.prompts,
+        });
     } catch (error) {
         console.error('Error processing prompt file:', error);
         res.status(500).send({ error: 'Failed to process the prompt file.' });
     }
 });
 
+app.get('/api/fetch-prompts/:projectName', async (req, res) => {
+    const { projectName } = req.params;
+
+    try {
+        const project = await Project.findOne({ projectName });
+
+        if (!project) {
+            return res.status(404).send({ error: 'Project not found.' });
+        }
+
+        res.status(200).json({ prompts: project.prompts });
+    } catch (error) {
+        console.error('Error fetching prompts:', error);
+        res.status(500).send({ error: 'Failed to fetch prompts.' });
+    }
+});
+
 // Route to upload tags and replace placeholders in the prompts
-app.post('/api/upload-tags', upload.single('file'), (req, res) => {
+app.post('/api/upload-tags', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send({ error: 'No file uploaded.' });
     }
 
     try {
+        // Load the uploaded file
         const workbook = xlsx.readFile(req.file.path);
         const sheetName = workbook.SheetNames[0];
         const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        if (prompts.length === 0) {
-            return res.status(400).send({ error: 'No prompts uploaded. Please upload the prompt file first.' });
+        // Fetch the projectName from the request body to find prompts in the DB
+        const { projectName } = req.body;
+
+        if (!projectName) {
+            return res.status(400).send({ error: 'Project name is required.' });
         }
 
-        filledPromptsWithProjects = sheetData.map(row => {
-            const projectName = row.projectName || 'Unknown Project';
-            const filledPrompts = prompts.map(prompt => {
+        // Retrieve the project and its prompts from the database
+        const project = await Project.findOne({ projectName });
+
+        if (!project || !project.prompts || project.prompts.length === 0) {
+            return res.status(400).send({ error: 'No prompts found for the project. Please upload prompts first.' });
+        }
+
+        // Map the projectName dynamically from the tag file
+        const filledPromptsWithProjects = sheetData.map((row) => {
+            const rowProjectName = row.projectName || 'Unknown Project'; // Read projectName dynamically
+            const filledPrompts = project.prompts.map((prompt) => {
                 let filledPrompt = prompt;
                 for (const key in row) {
                     if (row.hasOwnProperty(key)) {
@@ -73,10 +156,14 @@ app.post('/api/upload-tags', upload.single('file'), (req, res) => {
                 }
                 return filledPrompt;
             });
-            return { projectName, filledPrompts };
+            return { projectName: rowProjectName, filledPrompts }; // Use projectName from the row
         });
 
-        res.json({ filledPromptsWithProjects });
+        res.status(200).json({ filledPromptsWithProjects });
+        console.log('API request received');
+        console.log('Uploaded file:', req.file);
+        console.log('Project Name from Request:', projectName);
+        console.log('Filled Prompts with Projects:', filledPromptsWithProjects);
     } catch (error) {
         console.error('Error processing tags file:', error);
         res.status(500).send({ error: 'Failed to process the tags file.' });
@@ -85,12 +172,13 @@ app.post('/api/upload-tags', upload.single('file'), (req, res) => {
 
 
 
+
 const callOpenAIWithTimeout = async (prompt, timeout = 15000) => {
     return Promise.race([
         openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4o-mini',
             messages: [{ role: 'user', content: prompt }],
-            max_tokens: 150,
+            max_tokens: 200,
         }),
         new Promise((_, reject) =>
             setTimeout(() => reject(new Error('OpenAI request timed out')), timeout)
@@ -196,6 +284,36 @@ app.get('/api/download/:fileName', (req, res) => {
         });
     } else {
         res.status(404).send({ error: 'File not found.' });
+    }
+});
+
+
+
+// Routes
+app.get('/api/projects', async (req, res) => {
+    try {
+        const projects = await Project.find();
+        res.json(projects);
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+        res.status(500).send({ error: 'Failed to fetch projects.' });
+    }
+});
+
+app.post('/api/projects', async (req, res) => {
+    const { projectName } = req.body;
+
+    if (!projectName) {
+        return res.status(400).send({ error: 'Project name is required.' });
+    }
+
+    try {
+        const newProject = new Project({ projectName });
+        await newProject.save();
+        res.status(201).json(newProject);
+    } catch (error) {
+        console.error('Error saving project:', error);
+        res.status(500).send({ error: 'Failed to save project.' });
     }
 });
 
