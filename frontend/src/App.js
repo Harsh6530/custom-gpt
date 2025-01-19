@@ -9,8 +9,15 @@ const App = () => {
     return (
         <Router>
             <div className="app-container">
-                {/* SidePanel is outside of Routes to ensure it appears on all screens */}
+                {/* Static Header */}
+                <header className="static-header">
+                    <div className="header-title">Custom GPT</div>
+                </header>
+                
+                {/* SidePanel to appear on all screens */}
                 <SidePanel />
+
+                {/* Main Content */}
                 <main className="main-content">
                     <Routes>
                         {/* HomePage displayed when route is "/" */}

@@ -173,12 +173,76 @@ app.post('/api/upload-tags', upload.single('file'), async (req, res) => {
 
 
 
+const cleanAndFormatResponse = (responseText) => {
+    if (!responseText) return 'No response';
+
+    // Remove unnecessary markdown characters
+    let cleanedText = responseText
+        .replace(/[#*_-]/g, '') // Remove hashtags, asterisks, underscores, and dashes
+        .replace(/\s*\n\s*\n/g, '\n') // Normalize empty lines
+        .replace(/•/g, '-'); // Replace bullet points with dashes for uniformity
+
+    // Add a newline before numbered points (e.g., 1., 2., 3.)
+    cleanedText = cleanedText.replace(/(\d+\.)\s*/g, '\n$1 ');
+
+    // Add a newline before sub-points after colons (:)
+    cleanedText = cleanedText.replace(/:\s*/g, ':\n');
+
+    // Trim lines and ensure proper spacing
+    cleanedText = cleanedText
+        .split('\n')
+        .map((line) => line.trim()) // Trim each line
+        .filter((line) => line.length > 0) // Remove empty lines
+        .join('\n'); // Rejoin the lines
+
+    return cleanedText;
+};
+
+const createFormattedParagraphs = (prompt, response) => {
+    const cleanedResponse = cleanAndFormatResponse(response);
+    const paragraphs = [];
+
+    // Add the prompt as the first paragraph, bold and red
+    paragraphs.push(
+        new Paragraph({}), // Add an empty paragraph for spacing before the prompt
+        new Paragraph({
+            children: [new TextRun({ text: `Prompt: ${prompt}`, bold: true, color: 'FF0000' })],
+        }),
+        new Paragraph({}) // Add an empty paragraph for spacing before the response
+    );
+
+    // Process each line in the cleaned response
+    const lines = cleanedResponse.split('\n');
+    lines.forEach((line) => {
+        if (/^\d+\./.test(line) || line.endsWith(':')) {
+            // Add a blank line (empty paragraph) before the header
+            paragraphs.push(new Paragraph({})); // Blank line before headers
+
+            // Add the header with bold text
+            paragraphs.push(
+                new Paragraph({
+                    children: [new TextRun({ text: line, bold: true })],
+                })
+            );
+        } else {
+            // Regular text
+            paragraphs.push(
+                new Paragraph({
+                    children: [new TextRun({ text: line })],
+                })
+            );
+        }
+    });
+
+    return paragraphs;
+};
+
 const callOpenAIWithTimeout = async (prompt, timeout = 15000) => {
     return Promise.race([
         openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: 'gpt-4o',
             messages: [{ role: 'user', content: prompt }],
-            max_tokens: 200,
+            max_tokens: 1024,
         }),
         new Promise((_, reject) =>
             setTimeout(() => reject(new Error('OpenAI request timed out')), timeout)
@@ -197,15 +261,12 @@ app.post('/api/generate-responses', async (req, res) => {
 
     try {
         console.log('Processing projects...');
-        console.log('Filled Prompts with Projects:', JSON.stringify(filledPromptsWithProjects, null, 2));
-
         const projectFiles = [];
 
         for (const project of filledPromptsWithProjects) {
             const { projectName, filledPrompts } = project;
 
             console.log(`Processing project: ${projectName}`);
-            console.log(`Prompts: ${JSON.stringify(filledPrompts)}`);
 
             if (!filledPrompts || !filledPrompts.length) continue;
 
@@ -217,28 +278,22 @@ app.post('/api/generate-responses', async (req, res) => {
 
                     const aiResponse = await callOpenAIWithTimeout(prompt);
 
-                    const responseText =
+                    const rawResponseText =
                         aiResponse?.choices?.[0]?.message?.content?.trim() || 'No response';
 
-                    paragraphs.push(
-                        new Paragraph({
-                            children: [
-                                new TextRun({ text: `Prompt: ${prompt}`, bold: true }),
-                                new TextRun('\n'),
-                                new TextRun({ text: `Response: ${responseText}` }),
-                            ],
-                        })
-                    );
+                    // Add formatted paragraphs
+                    paragraphs.push(...createFormattedParagraphs(prompt, rawResponseText));
                 } catch (error) {
                     console.error(`Error generating response for prompt "${prompt}":`, error.message);
                     paragraphs.push(
                         new Paragraph({
                             children: [
-                                new TextRun({ text: `Prompt: ${prompt}`, bold: true }),
+                                new TextRun({ text: `Prompt: ${prompt}`, bold: true, color: 'FF0000' }),
                                 new TextRun('\n'),
                                 new TextRun({ text: 'Response: Failed to generate response.', italic: true }),
                             ],
-                        })
+                        }),
+                        new Paragraph({}) // Add an empty paragraph for spacing
                     );
                 }
             }
@@ -267,6 +322,7 @@ app.post('/api/generate-responses', async (req, res) => {
         res.status(500).send({ error: 'Failed to generate responses.' });
     }
 });
+
 
 
 
