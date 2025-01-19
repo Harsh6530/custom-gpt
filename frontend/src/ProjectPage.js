@@ -14,12 +14,12 @@ const ProjectPage = () => {
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: "", type: "" });
     const [isCollapsed, setIsCollapsed] = useState(false); // State to track collapse status
-
+    const baseURL = process.env.REACT_APP_BACKEND_URL;
 
     // Fetch prompts when the component loads
     useEffect(() => {
         setLoading(true);
-        fetch(`http://localhost:5000/api/fetch-prompts/${projectName}`)
+        fetch(`${baseURL}/api/fetch-prompts/${projectName}`)
             .then((response) => response.json())
             .then((data) => setPrompts(data.prompts || []))
             .catch((error) => {
@@ -46,6 +46,22 @@ const ProjectPage = () => {
         setTagFile(e.target.files[0]);
     };
 
+    // Function to delete all files in the Responses directory
+    const deleteResponsesOnReload = () => {
+        fetch(`${baseURL}/api/delete-responses`, {
+            method: "DELETE",
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Responses deleted:", data);
+                // showAlert("Previous responses cleared successfully.", "success");
+            })
+            .catch((error) => {
+                console.error("Error deleting responses:", error);
+                // showAlert("Failed to clear previous responses.", "error");
+            });
+    };
+
     const handleUploadPrompts = () => {
         if (!promptFile) return showAlert("Please select a prompt file first.", "error");
         if (!projectName) return showAlert("Project name is missing.", "error");
@@ -56,7 +72,7 @@ const ProjectPage = () => {
 
         setLoading(true);
 
-        fetch("http://localhost:5000/api/upload-prompts", {
+        fetch(`${baseURL}/api/upload-prompts`, {
             method: "POST",
             body: formData,
         })
@@ -72,6 +88,11 @@ const ProjectPage = () => {
             .finally(() => setLoading(false));
     };
 
+    // Call the delete API when the page loads
+    useEffect(() => {
+        deleteResponsesOnReload();
+    }, []);
+
     const handleUploadTags = () => {
         if (!tagFile) return showAlert("Please select a tag file first.", "error");
         if (!projectName) return showAlert("Project name is missing.", "error");
@@ -82,7 +103,7 @@ const ProjectPage = () => {
 
         setLoading(true);
 
-        fetch("http://localhost:5000/api/upload-tags", {
+        fetch(`${baseURL}/api/upload-tags`, {
             method: "POST",
             body: formData,
         })
@@ -112,7 +133,7 @@ const ProjectPage = () => {
 
         setLoading(true);
 
-        fetch("http://localhost:5000/api/generate-responses", {
+        fetch(`${baseURL}/api/generate-responses`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ filledPromptsWithProjects }),
@@ -149,7 +170,7 @@ const ProjectPage = () => {
 
     const handleDownload = (fileName) => {
         const link = document.createElement("a");
-        link.href = `http://localhost:5000/api/download/${encodeURIComponent(fileName)}`;
+        link.href = `${baseURL}/api/download/${encodeURIComponent(fileName)}`;
         link.click();
     };
 

@@ -321,8 +321,12 @@ app.post('/api/generate-responses', async (req, res) => {
                     },
                 ],
             });
+            const responsesDir = path.join(__dirname, 'Responses');
+            if (!fs.existsSync(responsesDir)) {
+                fs.mkdirSync(responsesDir); // Create the directory if it doesn't exist
+            }
 
-            const baseFileName = path.join(__dirname, `${projectName.replace(/\s+/g, '_')}_responses`);
+            const baseFileName = path.join(responsesDir, `${projectName.replace(/\s+/g, '_')}_responses`);
             const uniqueFileName = generateUniqueFilename(baseFileName, '.docx');
             const buffer = await Packer.toBuffer(doc);
             fs.writeFileSync(uniqueFileName, buffer);
@@ -343,7 +347,7 @@ app.post('/api/generate-responses', async (req, res) => {
 // Route to download Word file
 app.get('/api/download/:fileName', (req, res) => {
     const fileName = req.params.fileName;
-    const filePath = `./${fileName}`;
+    const filePath = path.join(__dirname, 'Responses', fileName); // Adjusted to point to the Responses directory
 
     if (fs.existsSync(filePath)) {
         res.download(filePath, (err) => {
@@ -386,6 +390,37 @@ app.post('/api/projects', async (req, res) => {
         res.status(500).send({ error: 'Failed to save project.' });
     }
 });
+
+// Route to delete all files in the Responses directory
+app.delete('/api/delete-responses', (req, res) => {
+    const responsesDir = path.join(__dirname, 'Responses');
+
+    // Check if the Responses directory exists
+    if (fs.existsSync(responsesDir)) {
+        fs.readdir(responsesDir, (err, files) => {
+            if (err) {
+                console.error('Error reading Responses directory:', err);
+                return res.status(500).send({ error: 'Failed to read Responses directory.' });
+            }
+
+            // Loop through and delete each file in the Responses directory
+            files.forEach((file) => {
+                const filePath = path.join(responsesDir, file);
+                fs.unlink(filePath, (unlinkErr) => {
+                    if (unlinkErr) {
+                        console.error(`Failed to delete file ${file}:`, unlinkErr);
+                    }
+                });
+            });
+
+            // Send a success response after files are deleted
+            res.status(200).send({ message: 'All responses deleted successfully.' });
+        });
+    } else {
+        res.status(404).send({ error: 'Responses directory not found.' });
+    }
+});
+
 
 // Start the server
 app.listen(PORT, () => {

@@ -6,9 +6,11 @@ const SidePanel = () => {
     const [projects, setProjects] = useState([]);
     const [newProjectName, setNewProjectName] = useState('');
     const navigate = useNavigate();
+    const baseURL= process.env.REACT_APP_BACKEND_URL;
+
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/projects')
+        fetch(`${baseURL}/api/projects`)
             .then((response) => response.json())
             .then((data) => setProjects(data))
             .catch((error) => console.error('Error fetching projects:', error));
@@ -20,7 +22,7 @@ const SidePanel = () => {
             return;
         }
 
-        fetch('http://localhost:5000/api/projects', {
+        fetch(`${baseURL}/api/projects`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ projectName: newProjectName }),
