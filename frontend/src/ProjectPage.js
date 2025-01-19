@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import './css/ProjectPage.css';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import "./css/ProjectPage.css";
+import Alert from "./components/Alert";
+import Loading from "./components/Loading";
 
 const ProjectPage = () => {
     const { projectName } = useParams(); // Retrieve the project name from the route params
@@ -9,17 +11,35 @@ const ProjectPage = () => {
     const [promptFile, setPromptFile] = useState(null);
     const [tagFile, setTagFile] = useState(null);
     const [downloadLinks, setDownloadLinks] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState({ show: false, message: "", type: "" });
+    const [isCollapsed, setIsCollapsed] = useState(false); // State to track collapse status
+
 
     // Fetch prompts when the component loads
     useEffect(() => {
+        setLoading(true);
         fetch(`http://localhost:5000/api/fetch-prompts/${projectName}`)
             .then((response) => response.json())
             .then((data) => setPrompts(data.prompts || []))
-            .catch((error) => console.error('Error fetching prompts:', error));
+            .catch((error) => {
+                console.error("Error fetching prompts:", error);
+                showAlert("Failed to fetch prompts.", "error");
+            })
+            .finally(() => setLoading(false));
     }, [projectName]);
+
+    const showAlert = (message, type) => {
+        setAlert({ show: true, message, type });
+        setTimeout(() => setAlert({ show: false, message: "", type: "" }), 3000);
+    };
 
     const handlePromptFileChange = (e) => {
         setPromptFile(e.target.files[0]);
+    };
+
+    const toggleUploadSection = () => {
+        setIsCollapsed((prev) => !prev);
     };
 
     const handleTagFileChange = (e) => {
@@ -27,36 +47,43 @@ const ProjectPage = () => {
     };
 
     const handleUploadPrompts = () => {
-        if (!promptFile) return alert('Please select a prompt file first.');
-        if (!projectName) return alert('Project name is missing.');
+        if (!promptFile) return showAlert("Please select a prompt file first.", "error");
+        if (!projectName) return showAlert("Project name is missing.", "error");
 
         const formData = new FormData();
-        formData.append('file', promptFile);
-        formData.append('projectName', projectName); // Add projectName to the form data
+        formData.append("file", promptFile);
+        formData.append("projectName", projectName);
 
-        console.log('API request received');
-        console.log('Uploaded file:', promptFile);
-        console.log('Project Name:', projectName);
+        setLoading(true);
 
-        fetch('http://localhost:5000/api/upload-prompts', {
-            method: 'POST',
+        fetch("http://localhost:5000/api/upload-prompts", {
+            method: "POST",
             body: formData,
         })
             .then((response) => response.json())
-            .then((data) => setPrompts(data.prompts || []))
-            .catch((error) => console.error('Error uploading prompt file:', error));
+            .then((data) => {
+                setPrompts(data.prompts || []);
+                showAlert("Prompts uploaded successfully!", "success");
+            })
+            .catch((error) => {
+                console.error("Error uploading prompt file:", error);
+                showAlert("Failed to upload prompts.", "error");
+            })
+            .finally(() => setLoading(false));
     };
 
     const handleUploadTags = () => {
-        if (!tagFile) return alert('Please select a tag file first.');
-        if (!projectName) return alert('Project name is missing.');
-    
+        if (!tagFile) return showAlert("Please select a tag file first.", "error");
+        if (!projectName) return showAlert("Project name is missing.", "error");
+
         const formData = new FormData();
-        formData.append('file', tagFile);
-        formData.append('projectName', projectName); // Include project name
-    
-        fetch('http://localhost:5000/api/upload-tags', {
-            method: 'POST',
+        formData.append("file", tagFile);
+        formData.append("projectName", projectName);
+
+        setLoading(true);
+
+        fetch("http://localhost:5000/api/upload-tags", {
+            method: "POST",
             body: formData,
         })
             .then((response) => {
@@ -68,46 +95,75 @@ const ProjectPage = () => {
                 return response.json();
             })
             .then((data) => {
-                console.log('Response from backend:', data);
                 setFilledPromptsWithProjects(data.filledPromptsWithProjects || []);
+                showAlert("Tags uploaded successfully!", "success");
             })
             .catch((error) => {
-                console.error('Error uploading tag file:', error.message);
-                alert(error.message); // Display the error to the user
-            });
+                console.error("Error uploading tag file:", error.message);
+                showAlert("Failed to upload tags.", "error");
+            })
+            .finally(() => setLoading(false));
     };
-    
+
     const handleGenerateResponses = () => {
-        fetch('http://localhost:5000/api/generate-responses', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        if (!filledPromptsWithProjects || filledPromptsWithProjects.length === 0) {
+            return showAlert("Upload a tag file first to generate responses.", "error");
+        }
+
+        setLoading(true);
+
+        fetch("http://localhost:5000/api/generate-responses", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ filledPromptsWithProjects }),
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log('Generated files:', data.projectFiles);
-                setDownloadLinks(data.projectFiles || []);
+                const nameCount = {};
+                const updatedLinks = data.projectFiles.map((file) => {
+                    const baseName = file.projectName;
+
+                    if (!nameCount[baseName]) {
+                        nameCount[baseName] = 0;
+                    } else {
+                        nameCount[baseName] += 1;
+                    }
+
+                    const isDuplicate = data.projectFiles.filter((f) => f.projectName === baseName).length > 1;
+                    const displayName = isDuplicate
+                        ? `${baseName}(${nameCount[baseName]})`
+                        : baseName;
+
+                    return { ...file, displayName };
+                });
+
+                setDownloadLinks(updatedLinks || []);
+                showAlert("Responses generated successfully!", "success");
             })
-            .catch((error) => console.error('Error generating responses:', error));
+            .catch((error) => {
+                console.error("Error generating responses:", error);
+                showAlert("Failed to generate responses.", "error");
+            })
+            .finally(() => setLoading(false));
     };
 
     const handleDownload = (fileName) => {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = `http://localhost:5000/api/download/${encodeURIComponent(fileName)}`;
         link.click();
     };
 
     return (
         <div className="project-page">
+            {loading && <Loading />}
+            {alert.show && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ show: false })} />}
             <header className="static-header">
                 <div className="header-title">Custom GPT</div>
                 <div className="header-project-name">Current Project: {projectName}</div>
             </header>
 
             <div className="content">
-                {/* <h1>Project: {projectName}</h1> */}
                 <header className="project-header">
-                    {/* <h2>Prompts</h2> */}
                     {Array.isArray(prompts) && prompts.length > 0 ? (
                         <ul>
                             {prompts.map((prompt, index) => (
@@ -117,34 +173,86 @@ const ProjectPage = () => {
                     ) : (
                         <p>No prompts uploaded yet.</p>
                     )}
-                    <h2>Step 1: Upload Prompt File</h2>
-                    <input type="file" accept=".xlsx, .xls" onChange={handlePromptFileChange} />
-                    <button onClick={handleUploadPrompts}>Upload Prompts</button>
+                </header>
 
-                    <h2>Step 2: Upload Tag File</h2>
-                    <input type="file" accept=".xlsx, .xls" onChange={handleTagFileChange} />
-                    <button onClick={handleUploadTags}>Upload Tags</button>
+                {/* <button
+                    className="toggle-button"
+                    onClick={toggleUploadSection}
+                >
+                    {isCollapsed ? "Show Upload Section" : "Hide Upload Section"}
+                </button> */}
 
-                    <h2>Step 3: Generate Responses</h2>
-                    <button onClick={handleGenerateResponses}>Generate Responses</button>
+                <div className={`upload-section ${isCollapsed ? "collapsed" : "expanded"}`}>
+                    <div className="upload-container">
+                        <h2>Step 1: Upload Prompt File</h2>
+                        <input type="file" accept=".xlsx, .xls" onChange={handlePromptFileChange} />
+                        
+                        <button onClick={handleUploadPrompts}>Upload Prompts</button>
+                    </div>
 
+                    <button className="arrow-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="4" y1="12" x2="20" y2="12"></line>
+                                <polyline points="14 6 20 12 14 18"></polyline>
+                            </svg>
+                    </button>
+                    
+                    <div className="upload-container">
+                        <h2>Step 2: Upload Tag File</h2>
+                
+                        <input type="file" accept=".xlsx, .xls" onChange={handleTagFileChange} />
+                        <button onClick={handleUploadTags}>Upload Tags</button>
+                        <button className="arrow-button" onClick={handleGenerateResponses}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="4" y1="12" x2="20" y2="12"></line>
+                                <polyline points="14 6 20 12 14 18"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Toggle Arrow */}
+                <div className="toggle-arrow" onClick={toggleUploadSection}>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={`arrow-icon ${isCollapsed ? "rotate-up" : "rotate-down"}`}
+                    >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+
+                <div className="download-section">
                     <h2>Download Word Files</h2>
                     {Array.isArray(downloadLinks) && downloadLinks.length > 0 ? (
-                        downloadLinks.map((file, index) => (
-                            <div key={index}>
-                                <button onClick={() => handleDownload(file.filePath.split('/').pop())}>
-                                    Download {file.projectName}
-                                </button>
-                            </div>
-                        ))
+                        <div className="file-list">
+                            {downloadLinks.map((file, index) => (
+                                <div key={index} className="file-container" onClick={() => handleDownload(file.filePath)}>
+                                    <div className="file-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                                            <line x1="9" y1="15" x2="12" y2="18"></line>
+                                            <line x1="15" y1="15" x2="12" y2="18"></line>
+                                        </svg>
+                                    </div>
+                                    <p className="file-name">{file.displayName}</p>
+                                </div>
+                            ))}
+                        </div>
                     ) : (
                         <p>No files available for download. Generate responses first.</p>
                     )}
-                </header>
+                </div>
             </div>
         </div>
     );
-
 };
 
 export default ProjectPage;

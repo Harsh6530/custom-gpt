@@ -6,6 +6,7 @@ const xlsx = require('xlsx');
 const { OpenAI } = require('openai');
 const { Document, Packer, Paragraph, TextRun } = require('docx');
 const fs = require('fs');
+const path = require('path');
 const app = express();
 const PORT = 5000;
 const Project = require('./models/Project');
@@ -252,6 +253,17 @@ const callOpenAIWithTimeout = async (prompt, timeout = 15000) => {
     ]);
 };
 
+// Function to generate a unique file name
+const generateUniqueFilename = (baseName, extension) => {
+    let counter = 0;
+    let filename = `${baseName}${extension}`;
+    while (fs.existsSync(filename)) {
+        counter++;
+        filename = `${baseName}(${counter})${extension}`;
+    }
+    return filename;
+};
+
 // Route to generate responses
 app.post('/api/generate-responses', async (req, res) => {
     console.log('API request received');
@@ -310,13 +322,14 @@ app.post('/api/generate-responses', async (req, res) => {
                 ],
             });
 
-            const filePath = `./${projectName.replace(/\s+/g, '_')}_responses.docx`;
+            const baseFileName = path.join(__dirname, `${projectName.replace(/\s+/g, '_')}_responses`);
+            const uniqueFileName = generateUniqueFilename(baseFileName, '.docx');
             const buffer = await Packer.toBuffer(doc);
-            fs.writeFileSync(filePath, buffer);
+            fs.writeFileSync(uniqueFileName, buffer);
 
-            console.log(`Word file generated: ${filePath}`);
+            console.log(`Word file generated: ${uniqueFileName}`);
 
-            projectFiles.push({ projectName, filePath });
+            projectFiles.push({ projectName: `${projectName} (${projectFiles.length})`, filePath: path.basename(uniqueFileName) });
         }
 
         res.json({ projectFiles });
