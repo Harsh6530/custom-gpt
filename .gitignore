@@ -10,6 +10,8 @@
 /backend/package-lock.json
 # testing
 /coverage
+/backend/.env
+/frontend/.env
 
 # production
 /build
