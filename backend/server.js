@@ -172,7 +172,7 @@ app.post('/api/upload-tags', upload.single('file'), async (req, res) => {
 
 
 
-
+// Function to clean and format the OpenAI response
 const cleanAndFormatResponse = (responseText) => {
     if (!responseText) return 'No response';
 
@@ -198,6 +198,7 @@ const cleanAndFormatResponse = (responseText) => {
     return cleanedText;
 };
 
+// Function to create paragraphs from the cleaned response
 const createFormattedParagraphs = (prompt, response) => {
     const cleanedResponse = cleanAndFormatResponse(response);
     const paragraphs = [];
@@ -237,6 +238,7 @@ const createFormattedParagraphs = (prompt, response) => {
     return paragraphs;
 };
 
+// Function to call OpenAI with a timeout
 const callOpenAIWithTimeout = async (prompt, timeout = 15000) => {
     return Promise.race([
         openai.chat.completions.create({
@@ -250,6 +252,7 @@ const callOpenAIWithTimeout = async (prompt, timeout = 15000) => {
     ]);
 };
 
+// Route to generate responses
 app.post('/api/generate-responses', async (req, res) => {
     console.log('API request received');
     const { filledPromptsWithProjects } = req.body;
@@ -322,8 +325,6 @@ app.post('/api/generate-responses', async (req, res) => {
         res.status(500).send({ error: 'Failed to generate responses.' });
     }
 });
-
-
 
 
 // Route to download Word file
