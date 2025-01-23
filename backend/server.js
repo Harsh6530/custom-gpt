@@ -95,7 +95,7 @@ app.post('/api/send-credentials', async (req, res) => {
             to: userId, // Recipient email
             type: type,
             subject: 'Your Login Credentials',
-            text: `Hello,\n\nHere are your login credentials:\nUser ID: ${userId}\nPassword: ${password}\n\nThank you,\nCustom GPT Team`,
+            text: `Hello,\n\nHere are your login credentials:\nType: ${type}\nUser ID: ${userId}\nPassword: ${password}\n\nThank you,\nCustom GPT Team`,
         };
 
         // Send the email

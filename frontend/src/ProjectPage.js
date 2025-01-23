@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { UserContext } from './components/UserContext';
 import "./css/ProjectPage.css";
 import Alert from "./components/Alert";
 import Loading from "./components/Loading";
@@ -15,8 +16,9 @@ const ProjectPage = () => {
     const [alert, setAlert] = useState({ show: false, message: "", type: "" });
     const [isCollapsed, setIsCollapsed] = useState(false); // State to track collapse status
     const [searchParams] = useSearchParams();
-    const userType = searchParams.get('userType') || localStorage.getItem('userType');
+    //const userType = searchParams.get('userType') || localStorage.getItem('userType');
     const navigate = useNavigate();
+    const { userType, setUserType } = useContext(UserContext); // Access `setUserType`
     const baseURL = process.env.REACT_APP_BACKEND_URL;
 
     // Fetch prompts when the component loads
@@ -191,8 +193,10 @@ const ProjectPage = () => {
     };
 
     return (
+        
         <div className="project-page">
             {loading && <Loading />}
+            console.log(userType);
             {alert.show && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ show: false })} />}
             <header className="static-header">
                 <div className="header-title" onClick={handleHeaderClick} style={{cursor: 'pointer'}}>Custom GPT</div>

@@ -5,6 +5,7 @@ import HomePage from './HomePage';
 import ProjectPage from './ProjectPage';
 import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
+import { UserProvider } from './components/UserContext';
 import './css/App.css';
 
 const App = () => {
@@ -47,6 +48,7 @@ const App = () => {
     };
 
     return (
+        <UserProvider>
         <Router>
             <div className="app-container">
                 <RenderHeaderAndSidePanel />
@@ -94,6 +96,7 @@ const App = () => {
                 </main>
             </div>
         </Router>
+        </UserProvider>
     );
 };
 

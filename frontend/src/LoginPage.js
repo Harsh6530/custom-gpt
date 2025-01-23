@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Loading from './components/Loading';
 import Alert from './components/Alert';
 import './css/LoginPage.css';
+import { UserContext } from './components/UserContext';
 
 const LoginPage = ({ onLogin }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [userType, setUserType] = useState('');
+    //const [userType, setUserType] = useState('');
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: '', type: '' });
     const navigate = useNavigate();
+    const { userType, setUserType } = useContext(UserContext);
 
     const showAlert = (message, type) => {
         setAlert({ show: true, message, type });
@@ -23,6 +25,7 @@ const LoginPage = ({ onLogin }) => {
         e.preventDefault();
         if (email && password && userType) {
             setLoading(true); // Show loading spinner
+            setUserType(userType);
             try {
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
                     email,
@@ -58,6 +61,11 @@ const LoginPage = ({ onLogin }) => {
             showAlert('Please enter all required fields.', 'error');
         }
     };
+
+    useEffect(() => {
+        console.log('UserType updated:', userType);
+    }, [userType]);
+    
 
     return (
         <div className="login-container">
