@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import SidePanel from './components/SidePanel';
 import HomePage from './HomePage';
 import ProjectPage from './ProjectPage';
@@ -26,19 +26,30 @@ const App = () => {
         localStorage.removeItem('isAuthenticated');
     };
 
-    return (
-        <Router>
-            <div className="app-container">
-                {isAuthenticated && (
+    const RenderHeaderAndSidePanel = () => {
+        const location = useLocation();
+        const isAdminRoute = location.pathname.startsWith('/admin');
+
+        if (isAuthenticated && !isAdminRoute) {
+            return (
+                <>
                     <header className="static-header">
                         <div className="header-title">Custom GPT</div>
                         <button className="logout-button" onClick={handleLogout}>
                             Logout
                         </button>
                     </header>
-                )}
+                    <SidePanel />
+                </>
+            );
+        }
+        return null; // Don't render for admin routes or unauthenticated users
+    };
 
-                {isAuthenticated && <SidePanel />}
+    return (
+        <Router>
+            <div className="app-container">
+                <RenderHeaderAndSidePanel />
 
                 <main className="main-content">
                     <Routes>
@@ -79,7 +90,6 @@ const App = () => {
                             path="/admin"
                             element={<AdminPage />}
                         />
-
                     </Routes>
                 </main>
             </div>

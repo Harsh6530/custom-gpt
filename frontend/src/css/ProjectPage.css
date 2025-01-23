@@ -82,7 +82,7 @@ input[type="file"] {
     bottom: 18px; /* Align the section at the bottom of the screen */
     left: 8;
     right: 8;
-    width: 76%; /* Prevent the section from going out of the screen */
+    width: 78%; /* Prevent the section from going out of the screen */
     margin: auto; /* Center the section horizontally */
     padding: 10px;
     background-color: #2b2b2b; /* Dark background for upload section */

@@ -2,101 +2,124 @@
 
 .admin-container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    padding: 20px;
+    height: 94vh;
+    overflow: hidden; /* Prevent scroll */
+}
+
+.admin-box {
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent white box */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+    border-radius: 12px; /* Rounded corners */
+    padding: 40px 50px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    backdrop-filter: blur(10px); /* Frosted glass effect */
+    animation: fadeIn 0.8s ease-in-out; /* Subtle fade-in animation */
 }
 
 h1 {
     font-size: 28px;
+    color: #ffffff; /* White text */
     font-weight: bold;
-    color: #333333;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 p {
     font-size: 16px;
-    color: #555555;
+    color: #e0e0e0; /* Light gray text */
     margin-bottom: 20px;
+    text-align: center;
 }
 
-.credentials-input {
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 20px;
+/* Reset box-sizing for consistency */
+* {
+    box-sizing: border-box; /* Ensures padding and border are included in element's total width and height */
 }
 
-.input-field {
+.credentials-input input,
+.dropdown-select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     font-size: 14px;
-    border: 1px solid #dcdcdc;
-    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+    border-radius: 6px;
     outline: none;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
-    transition: border-color 0.3s ease;
-}
-
-.input-field:focus {
-    border-color: #287238; /* Green border on focus */
-}
-
-.dropdown-container {
-    width: 100%;
-    max-width: 400px;
+    background-color: rgba(255, 255, 255, 0.1); /* Slight transparent background */
+    color: #ffffff; /* White text */
+    transition: border-color 0.3s ease, background-color 0.3s ease;
     margin-bottom: 20px;
+    box-sizing: border-box; /* Ensures consistent width calculation */
+}
+
+.credentials-input input:focus,
+.dropdown-select:focus {
+    border-color: #1db954; /* Green border on focus */
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly brighter background */
+}
+
+/* Dropdown select consistency */
+.dropdown-select {
+    width: 100%; /* Match input width */
+    padding: 12px; /* Match input padding */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Match input border */
+    border-radius: 6px; /* Match input border-radius */
+    background-color: rgba(255, 255, 255, 0.1); /* Match input background */
+    color: #ffffff; /* White text */
+}
+
+/* Optional: Ensure the same height between inputs and dropdown */
+.credentials-input input {
+    height: 50px; /* Set a uniform height */
 }
 
 .dropdown-select {
-    width: 100%;
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #dcdcdc;
-    border-radius: 4px;
-    outline: none;
-    background-color: #f9f9f9;
-    transition: border-color 0.3s ease;
+    height: 50px; /* Match the input height */
 }
-
 .dropdown-select:focus {
-    border-color: #287238; /* Green border on focus */
+    border-color: #1db954; /* Green border on focus */
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly brighter background */
 }
 
 .dropdown-select option {
     font-size: 14px;
-    color: #333333;
+    color: #333333; /* Dark text in dropdown */
 }
 
 .send-button {
-    background-color: #287238; /* Green button */
-    color: #ffffff;
+    background-color: #1db954; /* Bright green button */
+    color: #ffffff; /* White text */
     font-size: 16px;
     font-weight: bold;
-    padding: 12px 20px;
+    padding: 14px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
-    max-width: 400px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .send-button:hover {
-    background-color: #1f5c2d; /* Darker green on hover */
+    background-color: #17a74d; /* Darker green on hover */
+    transform: scale(1.02); /* Slight zoom effect */
 }
 
 .send-button:disabled {
-    background-color: #dcdcdc; /* Disabled button gray */
+    background-color: rgba(255, 255, 255, 0.2); /* Disabled button light gray */
     cursor: not-allowed;
 }
 
-p {
-    font-size: 14px;
-    font-weight: 500;
-    color: #555555;
-    margin-top: 15px;
-    text-align: center;
+/* Subtle fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

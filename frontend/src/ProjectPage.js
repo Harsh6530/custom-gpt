@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import "./css/ProjectPage.css";
 import Alert from "./components/Alert";
 import Loading from "./components/Loading";
@@ -16,6 +16,7 @@ const ProjectPage = () => {
     const [isCollapsed, setIsCollapsed] = useState(false); // State to track collapse status
     const [searchParams] = useSearchParams();
     const userType = searchParams.get('userType') || localStorage.getItem('userType');
+    const navigate = useNavigate();
     const baseURL = process.env.REACT_APP_BACKEND_URL;
 
     // Fetch prompts when the component loads
@@ -184,12 +185,17 @@ const ProjectPage = () => {
         link.click();
     };
 
+    const handleHeaderClick = () => {
+        // Navigate to the home page
+        navigate("/");
+    };
+
     return (
         <div className="project-page">
             {loading && <Loading />}
             {alert.show && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ show: false })} />}
             <header className="static-header">
-                <div className="header-title">Custom GPT</div>
+                <div className="header-title" onClick={handleHeaderClick} style={{cursor: 'pointer'}}>Custom GPT</div>
                 <div className="header-project-name">Current Project: {projectName}</div>
             </header>
 

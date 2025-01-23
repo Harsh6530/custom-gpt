@@ -1,33 +1,34 @@
-/* LoginPage.css */
-
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    
+    height: 94vh;
+    overflow: hidden; /* Prevent scroll */
 }
 
 .login-box {
-    background-color: #ffffff; /* White box */
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
-    padding: 20px 40px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.1); /* Transparent white box */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Slight border */
+    border-radius: 12px; /* Rounded corners */
+    padding: 40px 50px; /* Ample padding */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Subtle shadow */
     width: 100%;
     max-width: 400px;
     text-align: center;
+    backdrop-filter: blur(10px); /* Frosted glass effect */
+    overflow: hidden; /* Prevent scroll */
 }
 
-h1 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #333333;
+.login-box h1 {
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #ffffff; /* White text */
     font-weight: bold;
+    overflow: hidden; /* Prevent scroll */
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     text-align: left;
 }
 
@@ -35,69 +36,91 @@ label {
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #555555;
-    margin-bottom: 8px;
+    color: #e0e0e0; /* Light gray label */
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 input[type="email"],
 input[type="password"],
 select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     font-size: 14px;
-    border: 1px solid #dcdcdc;
-    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+    border-radius: 6px;
     outline: none;
     box-sizing: border-box;
-    background-color: #f9f9f9;
-    transition: border-color 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.1); /* Slight transparent background */
+    color: #ffffff; /* White text */
+    transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 input[type="email"]:focus,
 input[type="password"]:focus,
 select:focus {
-    border-color: #287238; /* Green focus border */
+    border-color: #1db954; /* Green focus border */
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly brighter background */
 }
 
 .checkbox-group {
     display: flex;
     align-items: center;
+    justify-content: center; /* Center align the checkbox and label */
     gap: 8px;
+    /* margin-bottom: 20px; */
     font-size: 14px;
-    color: #555555;
+    color: #e0e0e0; /* Light gray text */
 }
 
 .checkbox-group input {
     transform: scale(1.2);
 }
-
 .login-button {
-    background-color: #287238; /* Green button */
-    color: #ffffff;
+    background-color: #1db954; /* Bright green button */
+    color: #ffffff; /* White text */
     font-size: 16px;
     font-weight: bold;
-    padding: 12px 20px;
+    padding: 14px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .login-button:hover {
-    background-color: #1f5c2d; /* Darker green on hover */
+    background-color: #17a74d; /* Darker green on hover */
+    transform: scale(1.02); /* Slight zoom */
 }
 
 .login-button:disabled {
-    background-color: #dcdcdc; /* Disabled button gray */
+    background-color: rgba(255, 255, 255, 0.2); /* Disabled button light gray */
     cursor: not-allowed;
 }
 
 select {
-    background-color: #f9f9f9;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff; /* White text */
 }
 
 select option {
     font-size: 14px;
-    color: #333333;
+    color: #333333; /* Dark text in dropdown */
+}
+
+/* Add subtle animations */
+.login-box {
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

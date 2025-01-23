@@ -2,7 +2,7 @@
     width: 300px;
     background-color: #000000; /* Dark sidebar background */
     color: #ffffff; /* White text */
-    padding: 15px;
+    padding: 13px;
     height: 100vh; /* Full height */
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
     display: flex;
@@ -37,6 +37,7 @@
     position: relative;
     transition: background-color 0.2s ease;
     cursor: pointer;
+    width: 100%;
 }
 
 .project-item:hover {
@@ -82,30 +83,38 @@
 .add-project-section {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* Push the section to the bottom */
     width: 100%;
-    gap: 0.001px;
-    margin-top: 15px;
-    margin-bottom: 65px;
+    margin-bottom: 20px; /* Pushes the section to the bottom */
+    gap: 10px; /* Space between input and button */
+    padding: 10px 0; /* Add some padding for spacing */
 }
 
-
-.project-input {
+.add-project-section .project-input,
+.add-project-section .add-project-button {
+    width: 100%; /* Ensure both input and button have equal width */
+    max-width: 250px; /* Optional: Control max width */
+    box-sizing: border-box; /* Include padding in width calculation */
     padding: 10px;
+    border: 1px solid #4a4a4a; /* Light border */
     border-radius: 6px;
-    border: 1px solid #444; /* Dark border */
-    background-color: #2b2b2b; /* Input background */
-    color: #eaeaea; /* Input text color */
-    outline: none;
-    transition: border-color 0.3s, background-color 0.3s;
-    font-size: 0.9rem;
+    background-color: #333333; /* Slightly lighter background */
+    color: #ffffff; /* White text */
+    cursor: pointer;
+    margin-bottom: -10px;
+    width: 100%;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.project-input:focus {
+
+
+.add-project-section .project-input:focus {
     border-color: #4caf50; /* Green border on focus */
     background-color: #333333; /* Slightly lighter on focus */
 }
 
-.add-project-button {
+.add-project-section .add-project-button {
     padding: 10px 15px;
     background-color: #4caf50; /* Green button */
     color: #ffffff;

@@ -51,16 +51,16 @@ ul {
 }
 
 .logout-button {
-  background-color: #007bff;
+  background-color: #43ed5ac1;
   color: #ffffff;
   border: none;
-  padding: 10px 15px;
+  padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
-  width: 200px;
-  margin-right: 50px;
+  width: 150px;
+  margin-right: 40px;
   display: block;
 }
 

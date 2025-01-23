@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Loading from './components/Loading';
+import Alert from './components/Alert';
 import './css/LoginPage.css';
 
 const LoginPage = ({ onLogin }) => {
@@ -8,11 +10,19 @@ const LoginPage = ({ onLogin }) => {
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [userType, setUserType] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState({ show: false, message: '', type: '' });
     const navigate = useNavigate();
+
+    const showAlert = (message, type) => {
+        setAlert({ show: true, message, type });
+        setTimeout(() => setAlert({ show: false, message: '', type: '' }), 3000);
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         if (email && password && userType) {
+            setLoading(true); // Show loading spinner
             try {
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
                     email,
@@ -28,7 +38,7 @@ const LoginPage = ({ onLogin }) => {
                         localStorage.removeItem('email');
                         localStorage.removeItem('userType');
                     }
-                    alert('Login successful!');
+                    showAlert('Login successful!', 'success');
                     onLogin(userType);
 
                     // Navigate with query params
@@ -36,27 +46,33 @@ const LoginPage = ({ onLogin }) => {
                 }
             } catch (error) {
                 if (error.response?.status === 401) {
-                    alert('Invalid credentials or user type.');
+                    showAlert('Invalid credentials or user type.', 'error');
                 } else {
                     console.error('Login error:', error);
-                    alert('An error occurred during login.');
+                    showAlert('An error occurred during login.', 'error');
                 }
+            } finally {
+                setLoading(false); // Hide loading spinner
             }
         } else {
-            alert('Please enter all required fields.');
+            showAlert('Please enter all required fields.', 'error');
         }
     };
 
     return (
         <div className="login-container">
+            {loading && <Loading />} {/* Show Loading Spinner */}
+            {alert.show && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ show: false })} />} {/* Show Alert */}
+
             <div className="login-box">
-                <h1>Login</h1>
+                <h1>Custom GPT Login</h1>
                 <form onSubmit={handleLogin}>
                     <div className="form-group">
                         <label>Email:</label>
                         <input
                             type="email"
                             value={email}
+                            placeholder="Enter Email ID"
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
@@ -66,6 +82,7 @@ const LoginPage = ({ onLogin }) => {
                         <input
                             type="password"
                             value={password}
+                            placeholder="Enter Password"
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
