@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const xlsx = require('xlsx');
+const nodemailer = require('nodemailer');
 const { OpenAI } = require('openai');
 const { Document, Packer, Paragraph, TextRun } = require('docx');
 const fs = require('fs');
@@ -10,6 +11,7 @@ const path = require('path');
 const app = express();
 const PORT = 5000;
 const Project = require('./models/Project');
+const User = require('./models/User')
 
 // Load environment variables from .env file
 require('dotenv').config();
@@ -23,19 +25,123 @@ app.use(express.json());
 // Configure Multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
-let prompts = []; // Store uploaded prompts
-let filledPromptsWithProjects = [];
-
+// let prompts = []; // Store uploaded prompts
+// let filledPromptsWithProjects = [];
 mongoose
     .connect('mongodb+srv://sharmaharsh634:rajesh530@cluster0.jtsxc.mongodb.net/project_name_prompts?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => console.log('Connected to MongoDB'))
     .catch(error => console.error('Error connecting to MongoDB:', error));
+
+// mongoose
+//     .connect('mongodb+srv://sharmaharsh634:rajesh530@cluster0.jtsxc.mongodb.net/project_name_prompts?retryWrites=true&w=majority&appName=Cluster0')
+//     .then(() => console.log('Connected to project_name_prompts'))
+//     .catch(error => console.error('Error connecting to MongoDB:', error));
 
 
 // OpenAI Configuration
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Admin credentials
+
+// Endpoint to fetch all users
+// app.get('/api/users', async (req, res) => {
+//     try {
+//         const users = await User.find({}, { email: 1, _id: 0 }); // Only fetch email
+//         res.json(users);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Server error');
+//     }
+// });
+
+// Endpoint to send credentials via email
+
+app.post('/api/send-credentials', async (req, res) => {
+    const { type, userId, password } = req.body;
+    console.log(req.body);
+
+    // Validate the required fields
+    if (!userId || !password || !type) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    try {
+        // Save the user credentials to the database
+        const newUser = new User({
+            type: type,
+            email: userId, // Assuming `email` is the field in your User model
+            password, // Save the password securely (hash it in production)
+        });
+
+        await newUser.save(); // Save to the MongoDB collection
+
+        console.log('User credentials saved to the database');
+
+        // Nodemailer setup
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: 'gptcustom63@gmail.com', // Your email
+                pass: 'xygn rtkv ezkq pzzy', // Your email app password
+            },
+            logger: true,
+            debug: true,
+        });
+
+        const mailOptions = {
+            from: 'gptcustom63@gmail.com', // Sender email
+            to: userId, // Recipient email
+            type: type,
+            subject: 'Your Login Credentials',
+            text: `Hello,\n\nHere are your login credentials:\nUser ID: ${userId}\nPassword: ${password}\n\nThank you,\nCustom GPT Team`,
+        };
+
+        // Send the email
+        await transporter.sendMail(mailOptions);
+
+        // Respond with success
+        res.status(200).json({ message: 'Email sent and user saved successfully' });
+    } catch (error) {
+        console.error('Error:', error);
+
+        if (error.response) {
+            console.error('Nodemailer Response:', error.response);
+        }
+
+        res.status(500).json({ message: 'Failed to send email or save user' });
+    }
+});
+
+
+// Endpoint to verify admin login
+app.post('/api/login', async (req, res) => {
+    const { email, password, userType } = req.body;
+    console.log(req.body);
+
+    const type = userType.toLowerCase();
+
+    if (!email || !password || !userType) {
+        return res.status(400).json({ message: 'Email, password, and user type are required' });
+    }
+
+    try {
+        // Find the user with the specified email, password, and userType
+        const user = await User.findOne({ email, password, type });
+
+        if (user) {
+            return res.status(200).json({ message: 'Login successful', type });
+        } else {
+            return res.status(401).json({ message: 'Invalid credentials or user type' });
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 
 // Route to upload Excel file and extract prompts
 app.post('/api/upload-prompts', upload.single('file'), async (req, res) => {
@@ -358,6 +464,23 @@ app.get('/api/download/:fileName', (req, res) => {
         });
     } else {
         res.status(404).send({ error: 'File not found.' });
+    }
+});
+
+app.delete('/api/projects/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const project = await Project.findByIdAndDelete(id);
+
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        res.status(200).json({ message: 'Project deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 

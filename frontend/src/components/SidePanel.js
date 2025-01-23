@@ -6,8 +6,7 @@ const SidePanel = () => {
     const [projects, setProjects] = useState([]);
     const [newProjectName, setNewProjectName] = useState('');
     const navigate = useNavigate();
-    const baseURL= process.env.REACT_APP_BACKEND_URL;
-
+    const baseURL = process.env.REACT_APP_BACKEND_URL;
 
     useEffect(() => {
         fetch(`${baseURL}/api/projects`)
@@ -35,21 +34,51 @@ const SidePanel = () => {
             .catch((error) => console.error('Error adding project:', error));
     };
 
+    const handleDeleteProject = (projectId, projectName) => {
+        const confirmDelete = window.confirm(
+            `Are you sure you want to delete the project "${projectName}"? This action cannot be undone.`
+        );
+
+        if (!confirmDelete) return;
+
+        fetch(`${baseURL}/api/projects/${projectId}`, {
+            method: 'DELETE',
+        })
+            .then((response) => {
+                if (response.ok) {
+                    setProjects((prevProjects) =>
+                        prevProjects.filter((project) => project._id !== projectId)
+                    );
+                    alert(`Project "${projectName}" has been deleted.`);
+                    window.location.reload();
+                } else {
+                    throw new Error('Failed to delete the project');
+                }
+            })
+            .catch((error) => console.error('Error deleting project:', error));
+    };
+
     const handleProjectClick = (projectName) => {
         navigate(`/${projectName}`);
     };
 
     return (
         <div className="side-panel">
-            {/* <h2 className="side-panel-heading">Projects</h2> */}
             <div className="project-list">
                 {projects.map((project) => (
-                    <div
-                        key={project._id}
-                        className="project-item"
-                        onClick={() => handleProjectClick(project.projectName)}
-                    >
-                        {project.projectName}
+                    <div key={project._id} className="project-item">
+                        <span onClick={() => handleProjectClick(project.projectName)}>
+                            {project.projectName}
+                        </span>
+                        <button
+                            className="delete-button"
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevents triggering the project click event
+                                handleDeleteProject(project._id, project.projectName);
+                            }}
+                        >
+                            🗑️
+                        </button>
                     </div>
                 ))}
             </div>

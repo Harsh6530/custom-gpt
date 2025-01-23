@@ -1,30 +1,85 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import SidePanel from './components/SidePanel';
 import HomePage from './HomePage';
 import ProjectPage from './ProjectPage';
+import LoginPage from './LoginPage';
+import AdminPage from './AdminPage';
 import './css/App.css';
 
 const App = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // Check authentication status on component mount
+    useEffect(() => {
+        const savedAuth = localStorage.getItem('isAuthenticated');
+        setIsAuthenticated(savedAuth === 'true');
+    }, []);
+
+    const handleLogin = () => {
+        setIsAuthenticated(true);
+        localStorage.setItem('isAuthenticated', 'true');
+    };
+
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('isAuthenticated');
+    };
+
     return (
         <Router>
             <div className="app-container">
-                {/* Static Header */}
-                <header className="static-header">
-                    <div className="header-title">Custom GPT</div>
-                </header>
-                
-                {/* SidePanel to appear on all screens */}
-                <SidePanel />
+                {isAuthenticated && (
+                    <header className="static-header">
+                        <div className="header-title">Custom GPT</div>
+                        <button className="logout-button" onClick={handleLogout}>
+                            Logout
+                        </button>
+                    </header>
+                )}
 
-                {/* Main Content */}
+                {isAuthenticated && <SidePanel />}
+
                 <main className="main-content">
                     <Routes>
-                        {/* HomePage displayed when route is "/" */}
-                        <Route path="/" element={<HomePage />} />
+                        {/* LoginPage */}
+                        <Route
+                            path="/login"
+                            element={
+                                isAuthenticated ? (
+                                    <Navigate to="/" replace />
+                                ) : (
+                                    <LoginPage onLogin={handleLogin} />
+                                )
+                            }
+                        />
 
-                        {/* ProjectPage displayed for any project route */}
-                        <Route path="/:projectName" element={<ProjectPage />} />
+                        {/* Protected Routes */}
+                        <Route
+                            path="/"
+                            element={
+                                isAuthenticated ? (
+                                    <HomePage />
+                                ) : (
+                                    <Navigate to="/login" replace />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/:projectName"
+                            element={
+                                isAuthenticated ? (
+                                    <ProjectPage />
+                                ) : (
+                                    <Navigate to="/login" replace />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={<AdminPage />}
+                        />
+
                     </Routes>
                 </main>
             </div>

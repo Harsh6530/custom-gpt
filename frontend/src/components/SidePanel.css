@@ -27,18 +27,56 @@
 }
 
 .project-item {
-    padding: 10px;
-    margin: 8px 0;
-    background-color: #3b3b3b; /* Slightly lighter background */
-    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: #3a3a3a;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    position: relative;
+    transition: background-color 0.2s ease;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    font-size: 0.9rem;
 }
 
 .project-item:hover {
-    background-color: #4a4a4a; /* Highlight on hover */
-    transform: translateY(-2px); /* Lift effect */
+    background-color: #4a4a4a;
+}
+
+.project-item span {
+    font-size: 16px;
+    color: #ffffff;
+    text-align: left;
+    flex-grow: 1; /* Ensures the text spans across available space */
+}
+
+.delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    font-size: 18px;
+    color: #ffffff;
+    background-color: none;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 65%;
+    transform: translateY(-50%);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.delete-button:hover {
+    background-color: #ff7875;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.delete-button:active {
+    background-color: #ff4d4f;
+    transform: translateY(-50%) scale(0.95);
 }
 
 .add-project-section {
@@ -79,6 +117,8 @@
     margin-bottom: 7px;
     transition: background-color 0.3s, transform 0.2s;
 }
+
+
 
 .add-project-button:hover {
     background-color: #45a049; /* Darker green */

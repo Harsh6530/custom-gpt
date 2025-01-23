@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import "./css/ProjectPage.css";
 import Alert from "./components/Alert";
 import Loading from "./components/Loading";
@@ -14,6 +14,8 @@ const ProjectPage = () => {
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: "", type: "" });
     const [isCollapsed, setIsCollapsed] = useState(false); // State to track collapse status
+    const [searchParams] = useSearchParams();
+    const userType = searchParams.get('userType') || localStorage.getItem('userType');
     const baseURL = process.env.REACT_APP_BACKEND_URL;
 
     // Fetch prompts when the component loads
@@ -35,6 +37,10 @@ const ProjectPage = () => {
     };
 
     const handlePromptFileChange = (e) => {
+        if (userType !== "Admin") {
+            showAlert("Only admins can upload prompts.", "error");
+            return;
+        }
         setPromptFile(e.target.files[0]);
     };
 
@@ -63,6 +69,10 @@ const ProjectPage = () => {
     };
 
     const handleUploadPrompts = () => {
+        if (userType !== "Admin") {
+            showAlert("Only admins can upload prompts.", "error");
+            return;
+        }
         if (!promptFile) return showAlert("Please select a prompt file first.", "error");
         if (!projectName) return showAlert("Project name is missing.", "error");
 
@@ -206,7 +216,7 @@ const ProjectPage = () => {
                 <div className={`upload-section ${isCollapsed ? "collapsed" : "expanded"}`}>
                     <div className="upload-container">
                         <h2>Step 1: Upload Prompt File</h2>
-                        <input type="file" accept=".xlsx, .xls" onChange={handlePromptFileChange} />
+                        <input type="file" accept=".xlsx, .xls" onChange={handlePromptFileChange} disabled={userType !== "Admin"}  />
                         
                         <button onClick={handleUploadPrompts}>Upload Prompts</button>
                     </div>
