@@ -346,7 +346,7 @@ const createFormattedParagraphs = (prompt, response) => {
 };
 
 // Function to call OpenAI with a timeout
-const callOpenAIWithTimeout = async (prompt, timeout = 30000) => {
+const callOpenAIWithTimeout = async (prompt, timeout = 60000) => {
     return Promise.race([
         openai.chat.completions.create({
             model: 'gpt-4o',
