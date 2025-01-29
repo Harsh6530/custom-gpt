@@ -196,7 +196,6 @@ const ProjectPage = () => {
         
         <div className="project-page">
             {loading && <Loading />}
-            console.log(userType);
             {alert.show && <Alert message={alert.message} type={alert.type} onClose={() => setAlert({ show: false })} />}
             <header className="static-header">
                 <div className="header-title" onClick={handleHeaderClick} style={{cursor: 'pointer'}}>Custom GPT</div>

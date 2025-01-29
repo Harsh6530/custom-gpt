@@ -24,8 +24,10 @@ const LoginPage = ({ onLogin }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         if (email && password && userType) {
+            console.log(userType);
             setLoading(true); // Show loading spinner
             setUserType(userType);
+            localStorage.setItem('userType', userType);
             try {
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
                     email,
@@ -36,10 +38,8 @@ const LoginPage = ({ onLogin }) => {
                 if (response.status === 200) {
                     if (rememberMe) {
                         localStorage.setItem('email', email);
-                        localStorage.setItem('userType', userType);
                     } else {
                         localStorage.removeItem('email');
-                        localStorage.removeItem('userType');
                     }
                     showAlert('Login successful!', 'success');
                     onLogin(userType);
@@ -62,9 +62,9 @@ const LoginPage = ({ onLogin }) => {
         }
     };
 
-    useEffect(() => {
-        console.log('UserType updated:', userType);
-    }, [userType]);
+    // useEffect(() => {
+    //     console.log('UserType updated:', userType);
+    // }, [userType]);
     
 
     return (
