@@ -342,7 +342,7 @@ const callOpenAIWithTimeout = async (prompt, timeout = 60000) => {
         openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'user', content: prompt }],
-            max_tokens: 200,
+            max_tokens: 2700,
         }),
         new Promise((_, reject) =>
             setTimeout(() => reject(new Error('OpenAI request timed out')), timeout)
