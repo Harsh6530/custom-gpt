@@ -146,45 +146,60 @@ const ProjectPage = () => {
         if (!filledPromptsWithProjects || filledPromptsWithProjects.length === 0) {
             return showAlert("Upload a tag file first to generate responses.", "error");
         }
-
+    
         setLoading(true);
-
-        fetch(`${baseURL}/api/generate-responses`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filledPromptsWithProjects }),
-        })
+    
+        // ✅ Step 1: Delete existing responses first
+        fetch(`${baseURL}/api/delete-responses`, { method: "DELETE" })
             .then((response) => response.json())
             .then((data) => {
-                const nameCount = {};
-                const updatedLinks = data.projectFiles.map((file) => {
-                    const baseName = file.projectName;
-
-                    if (!nameCount[baseName]) {
-                        nameCount[baseName] = 0;
-                    } else {
-                        nameCount[baseName] += 1;
-                    }
-
-                    const isDuplicate = data.projectFiles.filter((f) => f.projectName === baseName).length > 1;
-                    const displayName = isDuplicate
-                        ? `${baseName}(${nameCount[baseName]})`
-                        : baseName;
-
-                    return { ...file, displayName };
-                });
-
-                setDownloadLinks(updatedLinks || []);
-                showAlert("Responses generated successfully!", "success");
-
-                checkResponsesFolder(); // ✅ Check after generating responses
+                console.log("✅ Responses deleted:", data);
+                
+                // ✅ Step 2: Now generate new responses
+                fetch(`${baseURL}/api/generate-responses`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ filledPromptsWithProjects }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    const nameCount = {};
+                    const updatedLinks = data.projectFiles.map((file) => {
+                        const baseName = file.projectName;
+    
+                        if (!nameCount[baseName]) {
+                            nameCount[baseName] = 0;
+                        } else {
+                            nameCount[baseName] += 1;
+                        }
+    
+                        const isDuplicate = data.projectFiles.filter((f) => f.projectName === baseName).length > 1;
+                        const displayName = isDuplicate
+                            ? `${baseName}(${nameCount[baseName]})`
+                            : baseName;
+    
+                        return { ...file, displayName };
+                    });
+    
+                    setDownloadLinks(updatedLinks || []);
+                    showAlert("Responses generated successfully!", "success");
+    
+                    // ✅ Re-check responses folder after generating files
+                    checkResponsesFolder();
+                })
+                .catch((error) => {
+                    console.error("Error generating responses:", error);
+                    showAlert("Failed to generate responses.", "error");
+                })
+                .finally(() => setLoading(false));
             })
             .catch((error) => {
-                console.error("Error generating responses:", error);
-                showAlert("Failed to generate responses.", "error");
-            })
-            .finally(() => setLoading(false));
+                console.error("❌ Error deleting existing responses:", error);
+                showAlert("Failed to delete old responses.", "error");
+                setLoading(false);
+            });
     };
+    
 
     const checkResponsesFolder = () => {
         console.log("🔄 Re-checking Responses folder...");

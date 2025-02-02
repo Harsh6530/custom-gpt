@@ -342,14 +342,19 @@ const callOpenAIWithTimeout = async (prompt, timeout = 90000) => {
     return Promise.race([
         openai.chat.completions.create({
             model: 'gpt-4o',
-            messages: [{ role: 'user', content: prompt }],
+            messages: [
+                { role: 'system', content: "Provide a detailed response to the prompt and try to consume the full token limit. Generate around 2000 words" },
+                { role: 'user', content: prompt }
+            ],
             max_tokens: 2700,
+            temperature: 0.8,
         }),
         new Promise((_, reject) =>
             setTimeout(() => reject(new Error('OpenAI request timed out')), timeout)
         ),
     ]);
 };
+
 
 // Function to generate a unique file name
 const generateUniqueFilename = (baseName, extension) => {
