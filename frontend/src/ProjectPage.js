@@ -11,6 +11,7 @@ const ProjectPage = () => {
     const { projectName } = useParams(); // Retrieve the project name from the route params
     const [prompts, setPrompts] = useState([]);
     const [filledPromptsWithProjects, setFilledPromptsWithProjects] = useState([]);
+    const [numberOfProjects, setNumberOfProjects] = useState(0); // ✅ Store project count
     const [promptFile, setPromptFile] = useState(null);
     const [tagFile, setTagFile] = useState(null);
     const [downloadLinks, setDownloadLinks] = useState([]);
@@ -110,37 +111,38 @@ const ProjectPage = () => {
     }, []);
 
     const handleUploadTags = () => {
-        if (!tagFile) return showAlert("Please select a tag file first.", "error");
-        if (!projectName) return showAlert("Project name is missing.", "error");
+    if (!tagFile) return showAlert("Please select a tag file first.", "error");
+    if (!projectName) return showAlert("Project name is missing.", "error");
 
-        const formData = new FormData();
-        formData.append("file", tagFile);
-        formData.append("projectName", projectName);
+    const formData = new FormData();
+    formData.append("file", tagFile);
+    formData.append("projectName", projectName);
 
-        setLoading(true);
+    setLoading(true);
 
-        fetch(`${baseURL}/api/upload-tags`, {
-            method: "POST",
-            body: formData,
+    fetch(`${baseURL}/api/upload-tags`, {
+        method: "POST",
+        body: formData,
+    })
+        .then((response) => {
+            if (!response.ok) {
+                return response.json().then((error) => {
+                    throw new Error(error.error);
+                });
+            }
+            return response.json();
         })
-            .then((response) => {
-                if (!response.ok) {
-                    return response.json().then((error) => {
-                        throw new Error(error.error);
-                    });
-                }
-                return response.json();
-            })
-            .then((data) => {
-                setFilledPromptsWithProjects(data.filledPromptsWithProjects || []);
-                showAlert("Tags uploaded successfully!", "success");
-            })
-            .catch((error) => {
-                console.error("Error uploading tag file:", error.message);
-                showAlert("Failed to upload tags.", "error");
-            })
-            .finally(() => setLoading(false));
-    };
+        .then((data) => {
+            setFilledPromptsWithProjects(data.filledPromptsWithProjects || []);
+            setNumberOfProjects(data.numberOfProjects || 0); // ✅ Store project count
+            showAlert(`Tags uploaded successfully! Found ${data.numberOfProjects} projects.`, "success");
+        })
+        .catch((error) => {
+            console.error("Error uploading tag file:", error.message);
+            showAlert("Failed to upload tags.", "error");
+        })
+        .finally(() => setLoading(false));
+};
 
     const handleGenerateResponses = () => {
         if (!filledPromptsWithProjects || filledPromptsWithProjects.length === 0) {

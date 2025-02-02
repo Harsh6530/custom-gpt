@@ -242,6 +242,9 @@ app.post('/api/upload-tags', upload.single('file'), async (req, res) => {
             return res.status(400).send({ error: 'No prompts found for the project. Please upload prompts first.' });
         }
 
+        // Count the number of projects (rows) in the uploaded file
+        const numberOfProjects = sheetData.length;
+
         // Map the projectName dynamically from the tag file
         const filledPromptsWithProjects = sheetData.map((row) => {
             const rowProjectName = row.projectName || 'Unknown Project'; // Read projectName dynamically
@@ -258,13 +261,19 @@ app.post('/api/upload-tags', upload.single('file'), async (req, res) => {
             return { projectName: rowProjectName, filledPrompts }; // Use projectName from the row
         });
 
-        res.status(200).json({ filledPromptsWithProjects });
-        console.log('API request received');
-        console.log('Uploaded file:', req.file);
-        console.log('Project Name from Request:', projectName);
-        console.log('Filled Prompts with Projects:', filledPromptsWithProjects);
+        res.status(200).json({ 
+            filledPromptsWithProjects, 
+            numberOfProjects  // ✅ Include the number of rows (projects)
+        });
+
+        console.log('✅ API request received');
+        console.log('📂 Uploaded file:', req.file);
+        console.log('📌 Project Name from Request:', projectName);
+        console.log('📊 Number of Projects (Rows):', numberOfProjects);
+        console.log('📝 Filled Prompts with Projects:', filledPromptsWithProjects);
+        
     } catch (error) {
-        console.error('Error processing tags file:', error);
+        console.error('❌ Error processing tags file:', error);
         res.status(500).send({ error: 'Failed to process the tags file.' });
     }
 });
