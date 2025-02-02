@@ -4,6 +4,8 @@ import { UserContext } from './components/UserContext';
 import "./css/ProjectPage.css";
 import Alert from "./components/Alert";
 import Loading from "./components/Loading";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileArchive } from '@fortawesome/free-solid-svg-icons'; // ZIP Icon
 
 const ProjectPage = () => {
     const { projectName } = useParams(); // Retrieve the project name from the route params
@@ -18,6 +20,7 @@ const ProjectPage = () => {
     const [searchParams] = useSearchParams();
     //const userType = searchParams.get('userType') || localStorage.getItem('userType');
     const navigate = useNavigate();
+    const [hasResponses, setHasResponses] = useState(false);
     const { userType, setUserType } = useContext(UserContext); // Access `setUserType`
     const baseURL = process.env.REACT_APP_BACKEND_URL;
 
@@ -173,6 +176,8 @@ const ProjectPage = () => {
 
                 setDownloadLinks(updatedLinks || []);
                 showAlert("Responses generated successfully!", "success");
+
+                checkResponsesFolder(); // ✅ Check after generating responses
             })
             .catch((error) => {
                 console.error("Error generating responses:", error);
@@ -181,10 +186,26 @@ const ProjectPage = () => {
             .finally(() => setLoading(false));
     };
 
-    const handleDownload = (fileName) => {
+    const checkResponsesFolder = () => {
+        console.log("🔄 Re-checking Responses folder...");
+        fetch(`${baseURL}/api/check-responses`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("✅ Updated API Response:", data);
+                setHasResponses(data.hasFiles); // ✅ Update state
+            })
+            .catch((error) => console.error("❌ Error checking responses folder:", error));
+    };
+    
+
+    // Function to download all files
+    const handleDownloadAll = () => {
         const link = document.createElement("a");
-        link.href = `${baseURL}/api/download/${encodeURIComponent(fileName)}`;
+        link.href = `${baseURL}/api/download-all`; // Call backend ZIP endpoint
+        link.download = "responses.zip";
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     };
 
     const handleHeaderClick = () => {
@@ -269,27 +290,18 @@ const ProjectPage = () => {
 
                 <div className="download-section">
                     <h2>Download Word Files</h2>
-                    {Array.isArray(downloadLinks) && downloadLinks.length > 0 ? (
-                        <div className="file-list">
-                            {downloadLinks.map((file, index) => (
-                                <div key={index} className="file-container" onClick={() => handleDownload(file.filePath)}>
-                                    <div className="file-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="12" y1="18" x2="12" y2="12"></line>
-                                            <line x1="9" y1="15" x2="12" y2="18"></line>
-                                            <line x1="15" y1="15" x2="12" y2="18"></line>
-                                        </svg>
-                                    </div>
-                                    <p className="file-name">{file.displayName}</p>
-                                </div>
-                            ))}
+
+                    {/* ✅ Show ZIP icon only if files exist */}
+                    {hasResponses ? (
+                        <div className="zip-download-icon" onClick={handleDownloadAll} title="Download all as ZIP">
+                            <FontAwesomeIcon icon={faFileArchive} size="3x" style={{ color: "#00bfff" }} />
                         </div>
                     ) : (
-                        <p>No files available for download. Generate responses first.</p>
+                        <p>No files available for download.</p>
                     )}
                 </div>
+
+
             </div>
         </div>
     );

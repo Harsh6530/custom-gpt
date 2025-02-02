@@ -328,3 +328,26 @@ p {
 
 
 }
+
+.zip-download-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 15px;
+    margin-top: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.zip-download-icon:hover {
+    transform: scale(1.1);
+}
+
+.zip-download-icon svg, .zip-download-icon .fa-file-zipper {
+    color: #00bfff; /* Bright blue */
+    transition: color 0.2s ease-in-out;
+}
+
+.zip-download-icon:hover svg, .zip-download-icon:hover .fa-file-zipper {
+    color: #ffffff; /* White on hover */
+}

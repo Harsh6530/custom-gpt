@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 const { OpenAI } = require('openai');
 const { Document, Packer, Paragraph, TextRun } = require('docx');
 const fs = require('fs');
+const archiver = require('archiver');
 const path = require('path');
 const app = express();
 const PORT = 5000;
@@ -442,22 +443,45 @@ app.post('/api/generate-responses', async (req, res) => {
     }
 });
 
+// Route to check if responses exist
+app.get('/api/check-responses', (req, res) => {
+    const folderPath = path.join(__dirname, 'Responses');
+
+    console.log("✅ Checking Responses folder...");
+
+    if (!fs.existsSync(folderPath)) {
+        console.log("❌ Folder does not exist.");
+        return res.json({ hasFiles: false });
+    }
+
+    const files = fs.readdirSync(folderPath);
+    console.log(`✅ Files found: ${files.length}`);
+    console.log(`📂 File list:`, files);
+
+    res.json({ hasFiles: files.length > 0 });
+});
 
 // Route to download Word file
-app.get('/api/download/:fileName', (req, res) => {
-    const fileName = req.params.fileName;
-    const filePath = path.join(__dirname, 'Responses', fileName); // Adjusted to point to the Responses directory
+app.get('/api/download-all', (req, res) => {
+    const folderPath = path.join(__dirname, 'Responses'); // Directory to zip
+    const zipFileName = 'responses.zip';
+    const zipFilePath = path.join(__dirname, zipFileName);
 
-    if (fs.existsSync(filePath)) {
-        res.download(filePath, (err) => {
-            if (err) {
-                console.error('Error downloading file:', err);
-            }
-            fs.unlinkSync(filePath); // Delete the file after download
-        });
-    } else {
-        res.status(404).send({ error: 'File not found.' });
+    // Check if the folder exists
+    if (!fs.existsSync(folderPath)) {
+        return res.status(404).send({ error: 'Responses folder not found.' });
     }
+
+    res.setHeader('Content-Disposition', `attachment; filename=${zipFileName}`);
+    res.setHeader('Content-Type', 'application/zip');
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.pipe(res);
+
+    // Append entire folder contents to ZIP
+    archive.directory(folderPath, false);
+
+    archive.finalize();
 });
 
 app.delete('/api/projects/:id', async (req, res) => {
