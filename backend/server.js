@@ -171,34 +171,25 @@ app.post('/api/upload-prompts', upload.single('file'), async (req, res) => {
 
         // Check if the project already exists
         let project = await Project.findOne({ projectName });
+
         if (project) {
             console.log('Project already exists:', project);
+            console.log('Overwriting prompts...');
 
-            // Filter out prompts that already exist
-            const uniquePrompts = newPrompts.filter((prompt) => !project.prompts.includes(prompt));
-            console.log('Unique Prompts:', uniquePrompts);
-
-            if (uniquePrompts.length === 0) {
-                return res.status(200).json({
-                    message: 'All prompts are already uploaded.',
-                    prompts: project.prompts,
-                });
-            }
-
-            // Add unique prompts to the existing project
-            project.prompts.push(...uniquePrompts);
+            // ✅ Overwrite prompts instead of appending
+            project.prompts = newPrompts;
         } else {
-            // Create a new project
+            // ✅ Create a new project if it doesn't exist
             console.log('Creating a new project...');
             project = new Project({ projectName, prompts: newPrompts });
         }
 
-        // Save the project to the database
+        // Save the project to the database (either updated or new)
         await project.save();
-        console.log('Project saved successfully.');
+        console.log('Project saved successfully with new prompts.');
 
         res.status(200).json({
-            message: 'Prompts uploaded successfully.',
+            message: 'Prompts uploaded and overwritten successfully.',
             prompts: project.prompts,
         });
     } catch (error) {
@@ -351,7 +342,7 @@ const callOpenAIWithTimeout = async (prompt, timeout = 60000) => {
         openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'user', content: prompt }],
-            max_tokens: 1024,
+            max_tokens: 200,
         }),
         new Promise((_, reject) =>
             setTimeout(() => reject(new Error('OpenAI request timed out')), timeout)
@@ -392,6 +383,7 @@ app.post('/api/generate-responses', async (req, res) => {
             if (!filledPrompts || !filledPrompts.length) continue;
 
             const paragraphs = [];
+            let index = 1;
 
             for (const prompt of filledPrompts) {
                 try {
@@ -403,13 +395,13 @@ app.post('/api/generate-responses', async (req, res) => {
                         aiResponse?.choices?.[0]?.message?.content?.trim() || 'No response';
 
                     // Add formatted paragraphs
-                    paragraphs.push(...createFormattedParagraphs(prompt, rawResponseText));
+                    paragraphs.push(...createFormattedParagraphs(index, rawResponseText));
                 } catch (error) {
-                    console.error(`Error generating response for prompt "${prompt}":`, error.message);
+                    console.error(`Error generating response for prompt "${index}":`, error.message);
                     paragraphs.push(
                         new Paragraph({
                             children: [
-                                new TextRun({ text: `Prompt: ${prompt}`, bold: true, color: 'FF0000' }),
+                                new TextRun({ text: `Prompt: ${index}`, bold: true, color: 'FF0000' }),
                                 new TextRun('\n'),
                                 new TextRun({ text: 'Response: Failed to generate response.', italic: true }),
                             ],
@@ -417,6 +409,7 @@ app.post('/api/generate-responses', async (req, res) => {
                         new Paragraph({}) // Add an empty paragraph for spacing
                     );
                 }
+                index++;
             }
 
             const doc = new Document({
