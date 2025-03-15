@@ -1,65 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Alert from './components/Alert';
-import Loading from './components/Loading';
-import './css/AdminPage.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import AdminSidePanel from "./components/AdminSidePanel"; // ✅ Import Side Panel
+import Alert from "./components/Alert";
+import Loading from "./components/Loading";
+import "./css/AdminPage.css";
 
 const AdminPage = () => {
-    const [authPassword, setAuthPassword] = useState(''); // Password input field
-    const [isAuthenticated, setIsAuthenticated] = useState(false); // Authentication state
-    const [adminPassword, setAdminPassword] = useState(''); // Admin password input
-    const [userId, setUserId] = useState('');
-    const [password, setPassword] = useState('');
-    const [userType, setUserType] = useState('');
-    const [message, setMessage] = useState('');
-    const [alertType, setAlertType] = useState('');
+    const [authPassword, setAuthPassword] = useState(""); 
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userId, setUserId] = useState("");
+    const [password, setPassword] = useState("");
+    const [userType, setUserType] = useState("");
+    const [message, setMessage] = useState("");
+    const [alertType, setAlertType] = useState("");
     const [loading, setLoading] = useState(false);
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // ✅ Sidebar state
+    const navigate = useNavigate();
     const baseURL = process.env.REACT_APP_BACKEND_URL;
 
     useEffect(() => {
-        // Check if admin is already authenticated (persistent session)
-        const storedAuth = localStorage.getItem('isAdminAuthenticated');
-        if (storedAuth === 'true') {
+        const storedAuth = localStorage.getItem("isAdminAuthenticated");
+        if (storedAuth === "true") {
             setIsAuthenticated(true);
         }
     }, []);
 
     const checkAdminPassword = () => {
-        const correctPassword = "SecureAdmin123"; // 🔒 Change this to a secure password
+        const correctPassword = "SecureAdmin123"; // 🔒 Secure password
         if (authPassword === correctPassword) {
             setIsAuthenticated(true);
-            localStorage.setItem('isAdminAuthenticated', 'true'); // Persist session
+            localStorage.setItem("isAdminAuthenticated", "true");
         } else {
-            setMessage('Incorrect admin password!');
-            setAlertType('error');
+            setMessage("Incorrect admin password!");
+            setAlertType("error");
         }
-        setAuthPassword(''); // Clear input after submission
+        setAuthPassword(""); 
     };
 
     const logoutAdmin = () => {
         setIsAuthenticated(false);
-        localStorage.removeItem('isAdminAuthenticated'); // Clear session
+        localStorage.removeItem("isAdminAuthenticated");
     };
 
     const sendCredentials = async () => {
         setLoading(true);
         try {
-            console.log('Sending payload:', { userId, password, userType });
-            const response = await axios.post(`${baseURL}/api/send-credentials`, {
-                userId,
-                password,
-                type: userType,
+            console.log("Sending payload:", { userId, password, userType });
+            const response = await fetch(`${baseURL}/api/send-credentials`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, password, type: userType }),
             });
-            console.log('Backend response:', response.data);
+            const data = await response.json();
+            console.log("Backend response:", data);
             setMessage(`Credentials sent to ${userId}`);
-            setAlertType('success');
-            setUserId('');
-            setPassword('');
-            setUserType('');
+            setAlertType("success");
+            setUserId("");
+            setPassword("");
+            setUserType("");
         } catch (error) {
-            console.error('Error sending credentials:', error);
-            setMessage('Failed to send credentials');
-            setAlertType('error');
+            console.error("Error sending credentials:", error);
+            setMessage("Failed to send credentials");
+            setAlertType("error");
         } finally {
             setLoading(false);
         }
@@ -69,7 +71,18 @@ const AdminPage = () => {
         <div className="admin-container">
             {loading && <Loading />}
             {message && <Alert message={message} type={alertType} />}
-            
+
+            {/* ✅ Header - Only Show After Authentication */}
+            {isAuthenticated && (
+                <header className="admin-header">
+                    <button className="hamburger-menu" onClick={() => setIsPanelOpen(true)}>
+                        ☰
+                    </button>
+                    <h1>Add New User</h1>
+                </header>
+            )}
+
+            {/* ✅ Authentication View */}
             {!isAuthenticated ? (
                 <div className="auth-box">
                     <h1>Admin Login</h1>
@@ -86,9 +99,6 @@ const AdminPage = () => {
                 </div>
             ) : (
                 <div className="admin-box">
-                    <h1>Admin Page</h1>
-                    
-
                     <p>Input credentials:</p>
                     <div className="credentials-input">
                         <input
@@ -131,6 +141,9 @@ const AdminPage = () => {
                     </button>
                 </div>
             )}
+
+            {/* ✅ Integrated Side Panel - Only Render if Authenticated */}
+            {isAuthenticated && <AdminSidePanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />}
         </div>
     );
 };

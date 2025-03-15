@@ -6,6 +6,7 @@
     font-family: 'Arial', sans-serif;
     background-color: #232222;
     overflow: hidden; /* Prevent scrolling */
+    margin-left: 250px;
 }
 
 .home-page .home-page-container {
@@ -146,6 +147,20 @@
 .home-page .pulse-button:hover {
     transform: scale(1.1);
     background: linear-gradient(135deg, #555555, #777777);
+}
+
+.save-button {
+    margin-top: 10px;
+    padding: 10px 30px;
+    font-size: 1.2rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #333333, #555555);
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease-in-out, background 0.3s;
+    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {

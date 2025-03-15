@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const axios = require('axios');
 const multer = require('multer');
 const xlsx = require('xlsx');
 const nodemailer = require('nodemailer');
@@ -13,9 +14,7 @@ const app = express();
 const PORT = 5000;
 const Project = require('./models/Project');
 const User = require('./models/User')
-
-// Load environment variables from .env file
-require('dotenv').config();
+const APISettings = require("./models/APIsettings");
 
 
 
@@ -40,10 +39,6 @@ mongoose
 
 
 // OpenAI Configuration
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
 // Admin credentials
 
 // Endpoint to fetch all users
@@ -348,21 +343,29 @@ const createFormattedParagraphs = (prompt, response) => {
 
 // Function to call OpenAI with a timeout
 const callOpenAIWithTimeout = async (prompt, timeout = 90000) => {
+    const response = await axios.get("http://localhost:5000/api/get-api-settings");
+    
+    const apiKey = response.data.apiKey;
+    const model = response.data.model;
+
+    const openai = new OpenAI({ apiKey });
+
     return Promise.race([
         openai.chat.completions.create({
-            model: 'gpt-4o',
+            model: model, // ✅ Use stored model
             messages: [
-                { role: 'system', content: "Provide a detailed response to the prompt and try to consume the full token limit. Generate around 2000 words" },
-                { role: 'user', content: prompt }
+                { role: "system", content: "Provide a detailed response to the prompt and try to consume the full token limit. Generate around 2000 words" },
+                { role: "user", content: prompt }
             ],
             max_tokens: 2700,
             temperature: 0.8,
         }),
         new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('OpenAI request timed out')), timeout)
+            setTimeout(() => reject(new Error("OpenAI request timed out")), timeout)
         ),
     ]);
 };
+
 
 
 // Function to generate a unique file name
@@ -572,6 +575,88 @@ app.delete('/api/delete-responses', (req, res) => {
         });
     } else {
         res.status(404).send({ error: 'Responses directory not found.' });
+    }
+});
+
+
+// ✅ Fetch all users
+app.get('/api/get-users', async (req, res) => {
+    try {
+        const users = await User.find(); // Fetch all users from MongoDB
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ error: "Failed to fetch users." });
+    }
+});
+
+
+// ✅ Update user details
+app.put('/api/update-user/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(req.body);
+        const { email, password, type } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(id, { email, password, type }, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        res.json({ success: true, user: updatedUser });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Failed to update user' });
+    }
+});
+
+// ✅ Delete user
+app.delete('/api/delete-user/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await User.findByIdAndDelete(id);
+        res.json({ success: true, message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Failed to delete user' });
+    }
+});
+
+// ✅ Get API Key & Model
+app.get("/api/get-api-settings", async (req, res) => {
+    try {
+        const settings = await APISettings.findOne();
+        if (!settings) return res.status(404).json({ error: "API settings not found" });
+
+        res.json({
+            apiKey: settings.apiKey,
+            model: settings.model
+        });
+    } catch (error) {
+        console.error("Error fetching API settings:", error);
+        res.status(500).json({ error: "Failed to fetch API settings" });
+    }
+});
+
+
+// ✅ Update API Key & Model (Admin only)
+app.post("/api/update-api-settings", async (req, res) => {
+    try {
+        console.log(req.body);
+        const { apiKey, model } = req.body;
+
+        let settings = await APISettings.findOne();
+
+        if (!settings) {
+            settings = new APISettings({});
+        }
+
+        // ✅ Only update fields that are provided in the request
+        if (apiKey) settings.apiKey = apiKey;
+        if (model) settings.model = model;
+
+        await settings.save();
+        res.json({ success: true, message: "API settings updated successfully", settings });
+    } catch (error) {
+        console.error("Error updating API settings:", error);
+        res.status(500).json({ error: "Failed to update API settings" });
     }
 });
 

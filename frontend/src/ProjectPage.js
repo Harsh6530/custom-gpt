@@ -241,8 +241,10 @@ const ProjectPage = () => {
             </header>
 
             <div className="content">
-                <header className="project-header">
-                    {Array.isArray(prompts) && prompts.length > 0 ? (
+            <header className="project-header">
+                {/* ✅ Show prompts only if userType is "Admin" */}
+                {userType === "Admin" ? (
+                    Array.isArray(prompts) && prompts.length > 0 ? (
                         <ul>
                             {prompts.map((prompt, index) => (
                                 <li key={index}>{prompt}</li>
@@ -250,8 +252,12 @@ const ProjectPage = () => {
                         </ul>
                     ) : (
                         <p>No prompts uploaded yet.</p>
-                    )}
-                </header>
+                    )
+                ) : (
+                    <p>You do not have permission to view these prompts.</p>
+                )}
+            </header>
+
 
                 {/* <button
                     className="toggle-button"

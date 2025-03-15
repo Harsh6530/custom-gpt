@@ -1,97 +1,130 @@
-/* AdminPage.css */
-
+/* ✅ Admin Page Container */
 .admin-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 94vh;
+    height: 100vh;
     overflow: hidden; /* Prevent scroll */
 }
 
+/* ✅ Admin Header with Hamburger */
+.admin-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 5px 0px;
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Prevent scroll */
+}
+
+.hamburger-menu {
+    font-size: 26px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    margin-left: -100px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.hamburger-menu:hover {
+    transform: scale(1.1);
+}
+
+/* ✅ Admin Content Box */
 .admin-box {
-    background-color: rgba(255, 255, 255, 0.1); /* Transparent white box */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
-    border-radius: 12px; /* Rounded corners */
+    margin: 100px auto;
+    background-color: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
     padding: 40px 50px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     width: 100%;
     max-width: 400px;
-    backdrop-filter: blur(10px); /* Frosted glass effect */
-    animation: fadeIn 0.8s ease-in-out; /* Subtle fade-in animation */
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.8s ease-in-out;
 }
 
+/* ✅ Titles */
 h1 {
-    font-size: 28px;
-    color: #ffffff; /* White text */
+    font-size: 20px;
+    color: #ffffff;
     font-weight: bold;
     margin-bottom: 20px;
 }
 
+/* ✅ Paragraph Text */
 p {
     font-size: 16px;
-    color: #e0e0e0; /* Light gray text */
+    color: #e0e0e0;
     margin-bottom: 20px;
     text-align: center;
 }
 
-/* Reset box-sizing for consistency */
-* {
-    box-sizing: border-box; /* Ensures padding and border are included in element's total width and height */
+input{
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-bottom: 15px;
 }
 
+/* ✅ Credentials Input */
 .credentials-input input,
 .dropdown-select {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     font-size: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     outline: none;
-    background-color: rgba(255, 255, 255, 0.1); /* Slight transparent background */
-    color: #ffffff; /* White text */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
     transition: border-color 0.3s ease, background-color 0.3s ease;
-    margin-bottom: 20px;
-    box-sizing: border-box; /* Ensures consistent width calculation */
+    margin-bottom: 15px;
 }
 
 .credentials-input input:focus,
 .dropdown-select:focus {
-    border-color: #1db954; /* Green border on focus */
-    background-color: rgba(255, 255, 255, 0.2); /* Slightly brighter background */
+    border-color: #1db954;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Dropdown select consistency */
+/* ✅ Dropdown Styling */
 .dropdown-select {
-    width: 100%; /* Match input width */
-    padding: 12px; /* Match input padding */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Match input border */
-    border-radius: 6px; /* Match input border-radius */
-    background-color: rgba(255, 255, 255, 0.1); /* Match input background */
-    color: #ffffff; /* White text */
-}
-
-/* Optional: Ensure the same height between inputs and dropdown */
-.credentials-input input {
-    height: 50px; /* Set a uniform height */
-}
-
-.dropdown-select {
-    height: 50px; /* Match the input height */
-}
-.dropdown-select:focus {
-    border-color: #1db954; /* Green border on focus */
-    background-color: rgba(255, 255, 255, 0.2); /* Slightly brighter background */
+    width: 100%;
+    padding: 14px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .dropdown-select option {
     font-size: 14px;
-    color: #333333; /* Dark text in dropdown */
+    color: #333;
 }
 
-.send-button {
-    background-color: #1db954; /* Bright green button */
-    color: #ffffff; /* White text */
+/* ✅ Consistent Input Heights */
+.credentials-input input,
+.dropdown-select {
+    height: 50px;
+}
+
+/* ✅ Buttons */
+.send-button,
+.log-b {
+    background-color: #1db954;
+    color: #ffffff;
     font-size: 16px;
     font-weight: bold;
     padding: 15px 20px;
@@ -100,21 +133,113 @@ p {
     cursor: pointer;
     width: 100%;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-bottom: 20px;
-    margin-top: -3px;
+    margin-bottom: 15px;
 }
 
 .send-button:hover {
-    background-color: #17a74d; /* Darker green on hover */
-    transform: scale(1.02); /* Slight zoom effect */
+    background-color: #17a74d;
+    transform: scale(1.02);
 }
 
 .send-button:disabled {
-    background-color: rgba(255, 255, 255, 0.2); /* Disabled button light gray */
+    background-color: rgba(255, 255, 255, 0.2);
     cursor: not-allowed;
 }
 
-/* Subtle fade-in animation */
+/* ✅ Logout Button */
+.log-b {
+    background: #dc3545;
+}
+
+.log-b:hover {
+    background: #a71d2a;
+}
+
+/* ✅ Auth Box */
+.auth-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Authentication Inputs */
+.auth-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #757070;
+    border-radius: 6px;
+}
+
+/* ✅ Auth Button */
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    background: #0bb44c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.auth-button:hover {
+    background: #0a953d;
+}
+
+/* ✅ Open Panel Button */
+.open-panel-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #fff;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.open-panel-btn:hover {
+    color: #1db954;
+}
+
+/* ✅ Sidebar Panel */
+.side-panel {
+    position: fixed;
+    top: 0;
+    left: -250px; /* Initially hidden */
+    width: 250px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: left 0.3s ease-in-out;
+}
+
+.side-panel.open {
+    left: 0;
+}
+
+/* ✅ Sidebar Buttons */
+.panel-button {
+    background: none;
+    border: none;
+    color: #fff;
+    padding: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.3s ease;
+}
+
+.panel-button:hover {
+    color: #1db954;
+}
+
+/* ✅ Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -126,49 +251,18 @@ p {
     }
 }
 
-.auth-box {
-    
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: rgba(255, 255, 255, 0.1);
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    .admin-container {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .admin-box {
+        width: 90%;
+    }
+
+    .side-panel {
+        width: 200px;
+    }
 }
-
-.auth-box input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #757070;
-    border-radius: 5px;
-}
-
-.auth-button {
-    width: 100%;
-    padding: 10px;
-    background: #0bb44c;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 5px;
-}
-
-.auth-button:hover {
-    background: #0bb44c;
-}
-
-/* .admin-box .logout-button {
-    padding: 10px 30px;
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 15px;
-}
-
-.admin-box .logout-button:hover {
-    background: darkred;
-} */
-
