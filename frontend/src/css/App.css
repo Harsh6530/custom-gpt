@@ -3,16 +3,22 @@
   display: flex;
   height: 100vh;
   font-family: Arial, sans-serif;
+  overflow: hidden;
 }
 
 /* Styles the main content area to take the remaining space next to the side panel */
+
 .main-content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+  flex-grow: 1; 
+  width: calc(100% - 290px); /* Adjust according to sidebar */
+  margin-left: 0px; /* Prevent content from going under the sidebar */
+  padding: 20px; /* Add padding for spacing */
+  overflow: hidden;
   background-color: #232222;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+/* Apply this class to pages that do NOT need the side panel (e.g. Login Page) */
+
 
 /* Styling for the headers and other reusable elements */
 .App-header {
@@ -27,9 +33,9 @@
 
 
 
-input[type="file"] {
+/* input[type="file"] {
   margin-bottom: 10px;
-}
+} */
 
 ul {
   list-style-type: none;
@@ -50,25 +56,6 @@ ul {
   color: #007bff;
 }
 
-.logout-button {
-  background-color: #43ed5ac1;
+/* p {
   color: #ffffff;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-  width: 150px;
-  margin-right: 40px;
-  display: block;
-}
-
-.logout-button:hover {
-  background-color: #0056b3;
-}
-
-
-p {
-  color: #ffffff;
-}
+} */

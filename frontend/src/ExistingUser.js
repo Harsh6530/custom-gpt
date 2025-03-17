@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AdminSidePanel from "./components/AdminSidePanel"; // ✅ Import Admin Side Panel
+import Alert from "./components/Alert"; // ✅ Import Custom Alert
+import Loading from "./components/Loading"; // ✅ Import Custom Loading
 import "./css/ExistingUser.css";
+import Confirm from "./components/Confirm"; // ✅ Import Custom Confirm Component
 
 const ExistingUser = () => {
     const [users, setUsers] = useState([]);
     const [editUser, setEditUser] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [isPanelOpen, setIsPanelOpen] = useState(false); // ✅ State for opening sidebar
-    const baseURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"; // ✅ Ensure this is set
+    const [alert, setAlert] = useState({ show: false, message: "", type: "" });
+    const [isPanelOpen, setIsPanelOpen] = useState(false); // ✅ State for sidebar
+    const baseURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
     // ✅ Fetch users on mount
     useEffect(() => {
@@ -18,14 +21,13 @@ const ExistingUser = () => {
 
     const fetchUsers = async () => {
         setLoading(true);
-        setError(null);
         try {
             const response = await axios.get(`${baseURL}/api/get-users`);
             console.log("🔍 API Response:", response.data);
             setUsers(response.data || []);
         } catch (error) {
             console.error("❌ Error fetching users:", error);
-            setError("Failed to load users.");
+            showAlert("Failed to load users.", "error");
             setUsers([]);
         } finally {
             setLoading(false);
@@ -40,18 +42,19 @@ const ExistingUser = () => {
     // ✅ Update user details
     const handleUpdateUser = async () => {
         if (!editUser) return;
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await axios.put(`${baseURL}/api/update-user/${editUser._id}`, editUser);
             if (response.data.success) {
-                fetchUsers(); // ✅ Refresh users
+                fetchUsers();
                 setEditUser(null);
+                showAlert("✅ User updated successfully!", "success"); // ✅ Show success prompt
             } else {
-                alert("Error updating user!");
+                showAlert("❌ Error updating user!", "error");
             }
         } catch (error) {
             console.error("❌ Error updating user:", error);
-            alert("Failed to update user.");
+            showAlert("Failed to update user.", "error");
         } finally {
             setLoading(false);
         }
@@ -60,28 +63,35 @@ const ExistingUser = () => {
     // ✅ Delete user
     const handleDeleteUser = async (userId) => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
+        setLoading(true);
         try {
-            setLoading(true);
             await axios.delete(`${baseURL}/api/delete-user/${userId}`);
-            fetchUsers(); // ✅ Refresh list
+            fetchUsers();
+            showAlert("✅ User deleted successfully!", "success"); // ✅ Show success prompt
         } catch (error) {
             console.error("❌ Error deleting user:", error);
-            alert("Failed to delete user.");
+            showAlert("Failed to delete user.", "error");
         } finally {
             setLoading(false);
         }
     };
 
+    // ✅ Show Alert Function
+    const showAlert = (message, type) => {
+        setAlert({ show: true, message, type });
+        setTimeout(() => setAlert({ show: false, message: "", type: "" }), 3000);
+    };
+
     return (
         <div className="existing-user-container">
+            {loading && <Loading />} {/* ✅ Custom Loading Component */}
+            {alert.show && <Alert message={alert.message} type={alert.type} />} {/* ✅ Custom Alert Component */}
+
             {/* ✅ Header with Hamburger Menu */}
             <div className="admin-header">
                 <button className="hamburger-menu" onClick={() => setIsPanelOpen(true)}>☰</button>
                 <h2>Manage Users</h2>
             </div>
-
-            {loading && <p>Loading...</p>}
-            {error && <p className="error-message">{error}</p>}
 
             <table className="user-table">
                 <thead>

@@ -28,7 +28,7 @@ const App = () => {
     const handleLogout = () => {
         setIsAuthenticated(false);
         localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('userType');
+        // localStorage.removeItem('userType');
     };
 
     const RenderHeaderAndSidePanel = () => {

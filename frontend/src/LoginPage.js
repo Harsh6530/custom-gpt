@@ -21,13 +21,25 @@ const LoginPage = ({ onLogin }) => {
         setTimeout(() => setAlert({ show: false, message: '', type: '' }), 3000);
     };
 
+    useEffect(() => {
+        const storedEmail = localStorage.getItem('email');
+        const storedPassword = localStorage.getItem('password');
+        const storedUserType = localStorage.getItem('userType');
+
+        if (storedEmail && storedPassword && storedUserType) {
+            setEmail(storedEmail);
+            setPassword(storedPassword);
+            setUserType(storedUserType);
+            setRememberMe(true); // ✅ Automatically check "Remember Me"
+        }
+    }, []);
+
     const handleLogin = async (e) => {
         e.preventDefault();
         if (email && password && userType) {
             console.log(userType);
             setLoading(true); // Show loading spinner
             setUserType(userType);
-            localStorage.setItem('userType', userType);
             try {
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/login`, {
                     email,
@@ -38,8 +50,12 @@ const LoginPage = ({ onLogin }) => {
                 if (response.status === 200) {
                     if (rememberMe) {
                         localStorage.setItem('email', email);
+                        localStorage.setItem('password', password);
+                        localStorage.setItem('userType', userType);
                     } else {
                         localStorage.removeItem('email');
+                        localStorage.removeItem('password');
+                        // localStorage.removeItem('userType');
                     }
                     showAlert('Login successful!', 'success');
                     onLogin(userType);

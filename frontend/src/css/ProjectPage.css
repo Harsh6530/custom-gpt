@@ -1,12 +1,3 @@
-/* Global Styles */
-
-
-.app-container {
-    display: flex;
-    height: 100vh; /* Full height of the screen */
-    overflow: hidden;
-    
-}
 
 .static-header {
     position: fixed;
@@ -94,7 +85,7 @@ input[type="file"] {
     overflow: hidden;
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
     transform: translateY(0); /* Default position */
-    margin-left: 297px;
+    margin-left: 15px;
 }
 
 /* Individual Upload Container */

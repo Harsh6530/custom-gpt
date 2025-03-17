@@ -5,7 +5,7 @@
     left: -100%;
     width: 250px;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.9) !important;
     transition: left 0.3s ease-in-out;
     z-index: 1000;
 }
@@ -13,8 +13,16 @@
 /* ✅ Show side panel when open */
 .admin-sidepanel-overlay.open {
     left: 0;
+    background-color: rgba(0, 0, 0, 0.9) !important;
 }
 
+.admin-sidepanel h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+    margin-left: 40px;
+    color: rgb(80, 228, 80);
+}
 /* ✅ Side panel container */
 .admin-sidepanel {
     width: 250px;
@@ -24,10 +32,11 @@
     display: flex;
     flex-direction: column;
     padding: 20px;
+    background-color: rgba(0, 0, 0, 0.9) !important;
 }
 
 /* ✅ Close button */
-.close-btn {
+.admin-sidepanel .close-btn {
     background: none;
     border: none;
     font-size: 18px;

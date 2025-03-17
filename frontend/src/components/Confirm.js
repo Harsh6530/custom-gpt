@@ -1,18 +1,14 @@
-import React from 'react';
-import './Confirm.css';
+import React from "react";
+import styles from "./Confirm.module.css"; // ✅ Import CSS Module
 
 const Confirm = ({ message, onConfirm, onCancel }) => {
     return (
-        <div className="confirm-overlay">
-            <div className="confirm-container">
-                <p className="confirm-message">{message}</p>
-                <div className="confirm-buttons">
-                    <button className="confirm-button confirm-yes" onClick={onConfirm}>
-                        Yes
-                    </button>
-                    <button className="confirm-button confirm-no" onClick={onCancel}>
-                        No
-                    </button>
+        <div className={styles.confirmOverlay}>
+            <div className={styles.confirmBox}>
+                <p>{message}</p>
+                <div className={styles.buttonContainer}>
+                    <button className={styles.confirmButton} onClick={onConfirm}>Yes</button>
+                    <button className={styles.cancelButton} onClick={onCancel}>Cancel</button>
                 </div>
             </div>
         </div>

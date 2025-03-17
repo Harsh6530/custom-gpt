@@ -343,7 +343,7 @@ const createFormattedParagraphs = (prompt, response) => {
 
 // Function to call OpenAI with a timeout
 const callOpenAIWithTimeout = async (prompt, timeout = 90000) => {
-    const response = await axios.get("http://localhost:5000/api/get-api-settings");
+    const response = await axios.get("http://3.86.52.25:5000/api/get-api-settings");
     
     const apiKey = response.data.apiKey;
     const model = response.data.model;
