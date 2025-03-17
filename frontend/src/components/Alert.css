@@ -1,6 +1,6 @@
 .alert-container {
     position: fixed;
-    top: 20px; /* Adjust to position vertically, or use '50%' for vertical centering */
+    top: 50px; /* Adjust to position vertically, or use '50%' for vertical centering */
     left: 42%; /* Center horizontally */
     background-color: #333;
     color: #eaeaea;
