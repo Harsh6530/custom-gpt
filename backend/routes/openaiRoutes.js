@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 const openaiController = require('../controllers/openaiController');
 
 router.post('/upload-tags', upload.single('file'), openaiController.uploadTags);

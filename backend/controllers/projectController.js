@@ -9,7 +9,7 @@ exports.uploadPrompts = async (req, res) => {
     }
     try {
         const { projectName } = req.body;
-        const workbook = xlsx.readFile(req.file.path);
+        const workbook = xlsx.read(req.file.buffer);
         const sheetName = workbook.SheetNames[0];
         const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
         const newPrompts = sheetData.map((row) => row.Prompt).filter(Boolean);

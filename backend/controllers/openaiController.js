@@ -11,7 +11,7 @@ exports.uploadTags = async (req, res) => {
         return res.status(400).send({ error: 'No file uploaded.' });
     }
     try {
-        const workbook = xlsx.readFile(req.file.path);
+        const workbook = xlsx.read(req.file.buffer);
         const sheetName = workbook.SheetNames[0];
         const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
         const { projectName } = req.body;

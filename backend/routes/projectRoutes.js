@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 const projectController = require('../controllers/projectController');
 
 router.post('/upload-prompts', upload.single('file'), projectController.uploadPrompts);
