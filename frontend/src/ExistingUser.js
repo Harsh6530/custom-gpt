@@ -12,7 +12,7 @@ const ExistingUser = () => {
     const [loading, setLoading] = useState(false);
     const [alert, setAlert] = useState({ show: false, message: "", type: "" });
     const [isPanelOpen, setIsPanelOpen] = useState(false); // ✅ State for sidebar
-    const baseURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+    const baseURL = process.env.REACT_APP_BACKEND_URL || "http://54.205.162.22:5001";
 
     // ✅ Fetch users on mount
     useEffect(() => {
