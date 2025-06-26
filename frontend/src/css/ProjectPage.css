@@ -1,4 +1,3 @@
-
 .static-header {
     position: fixed;
     top: 0;
@@ -32,15 +31,65 @@
     max-width: 300px; /* Add a max-width for responsive layout */
 }
 
+.content {
+    margin-top: 60px; /* Account for fixed header */
+    height: calc(100vh - 60px); /* Full height minus header */
+    display: flex;
+    flex-direction: column;
+}
+
+.main-layout {
+    display: flex;
+    flex-direction: column; /* Change to column for horizontal division */
+    height: 100%; /* Use full available height */
+    gap: 10px; /* Reduce gap */
+    padding: 10px 20px; /* Reduce top padding */
+    flex: 1; /* Take all available space */
+}
+
+.prompts-section {
+    flex: 3; /* Takes 3/4 of the height */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Important for proper flex behavior */
+    height: 10vh; /* Explicit height for 3/4 of viewport */
+    overflow: hidden; /* Prevent overflow */
+    margin-top: -20px; /* Small margin from top */
+}
+
+.prompts-container {
+    flex: 1;
+    overflow-y: scroll !important; /* Force scroll */
+    overflow-x: hidden; /* Hide horizontal scroll */
+    padding-right: 10px; /* Space for scrollbar */
+    padding-bottom: 20px; /* Add bottom padding to see last item fully */
+    max-height: calc(75vh - 10px); /* Adjust for smaller margin */
+    height: 100%;
+}
+
+.download-section {
+    flex: 1; /* Takes 1/4 of the height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center content vertically */
+    position: relative; /* Remove sticky positioning */
+    height: auto; /* Let flex handle height */
+    max-height: none; /* Remove max-height restriction */
+    min-height: 120px; /* Reduce minimum height */
+    margin-top: -60px; /* Shift up slightly */
+}
 
 .project-header {
-    margin: 40px 0;
+    margin-bottom: 20px;
+    flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .project-header h2 {
-    font-size: 1rem;
-    margin-bottom: 5px;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
     color: #eaeaea;
+    font-weight: bold;
 }
 
 .content h2 {
@@ -180,14 +229,7 @@ input[type="file"] {
 }
 
 
-/* Download Section */
-/* Download Section Styling */
-.download-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0px;
-}
+/* Download Section - New styling is defined above in main-layout */
 
 /* File List Container */
 .file-list {
@@ -270,7 +312,9 @@ input[type="file"]:hover {
 ul {
     list-style: none;
     padding: 0;
-    margin: px 0;
+    margin: 0;
+    height: auto;
+    min-height: 100%;
 }
 
 li {
@@ -284,11 +328,39 @@ li {
     word-wrap: break-word;
     font-size: 1rem;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: pre-wrap; /* Preserve line breaks */
+    line-height: 1.5;
 }
 
 li:hover {
     background: #333333;
     transform: translateY(-2px);
+}
+
+/* Custom scrollbar styling */
+.prompts-container::-webkit-scrollbar {
+    width: 12px; /* Make scrollbar more visible */
+}
+
+.prompts-container::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.prompts-container::-webkit-scrollbar-thumb {
+    background: #4caf50;
+    border-radius: 4px;
+    border: 2px solid #1a1a1a; /* Add border for better visibility */
+}
+
+.prompts-container::-webkit-scrollbar-thumb:hover {
+    background: #45a049;
+}
+
+/* Firefox scrollbar styling */
+.prompts-container {
+    scrollbar-width: auto; /* Make scrollbar visible */
+    scrollbar-color: #4caf50 #1a1a1a;
 }
 
 p {

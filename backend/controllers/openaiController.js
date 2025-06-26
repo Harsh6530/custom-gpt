@@ -10,6 +10,8 @@ exports.uploadTags = async (req, res) => {
     if (!req.file) {
         return res.status(400).send({ error: 'No file uploaded.' });
     }
+    // Log file and project name
+    console.log('Tag file uploaded:', req.file.originalname, 'for project:', req.body.projectName);
     try {
         const workbook = xlsx.read(req.file.buffer);
         const sheetName = workbook.SheetNames[0];

@@ -6,7 +6,8 @@ const fs = require('fs');
 const cleanAndFormatResponse = (responseText) => {
     if (!responseText) return 'No response';
     let cleanedText = responseText
-        .replace(/[#*_-]/g, '')
+        .replace(/\*\*/g, '') // Remove double asterisks for bold
+        .replace(/#/g, '') // Remove hash for headers
         .replace(/\s*\n\s*\n/g, '\n')
         .replace(/•/g, '-');
     cleanedText = cleanedText.replace(/(\d+\.)\s*/g, '\n$1 ');

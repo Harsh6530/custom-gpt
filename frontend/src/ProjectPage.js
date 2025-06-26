@@ -241,31 +241,43 @@ const ProjectPage = () => {
             </header>
 
             <div className="content">
-            <header className="project-header">
-                {/* ✅ Show prompts only if userType is "Admin" */}
-                {userType === "Admin" ? (
-                    Array.isArray(prompts) && prompts.length > 0 ? (
-                        <ul>
-                            {prompts.map((prompt, index) => (
-                                <li key={index}>{prompt}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No prompts uploaded yet.</p>
-                    )
-                ) : (
-                    <p>You do not have permission to view these prompts.</p>
-                )}
-            </header>
+                <div className="main-layout">
+                    {/* Prompts Section - 3/4 of the page */}
+                    <div className="prompts-section">
+                        {/* ✅ Show prompts only if userType is "Admin" */}
+                        {userType === "Admin" ? (
+                            Array.isArray(prompts) && prompts.length > 0 ? (
+                                <div className="prompts-container">
+                                    <ul>
+                                        {prompts.map((prompt, index) => (
+                                            <li key={index}>{prompt}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : (
+                                <p>No prompts uploaded yet.</p>
+                            )
+                        ) : (
+                            <p>You do not have permission to view these prompts.</p>
+                        )}
+                    </div>
 
+                    {/* Download Section - 1/4 of the page */}
+                    <div className="download-section">
+                        <h2>Download Word Files</h2>
 
-                {/* <button
-                    className="toggle-button"
-                    onClick={toggleUploadSection}
-                >
-                    {isCollapsed ? "Show Upload Section" : "Hide Upload Section"}
-                </button> */}
+                        {/* ✅ Show ZIP icon only if files exist */}
+                        {hasResponses ? (
+                            <div className="zip-download-icon" onClick={handleDownloadAll} title="Download all as ZIP">
+                                <FontAwesomeIcon icon={faFileArchive} size="3x" style={{ color: "#00bfff" }} />
+                            </div>
+                        ) : (
+                            <p>No files available for download.</p>
+                        )}
+                    </div>
+                </div>
 
+                {/* Upload Section - Fixed at bottom */}
                 <div className={`upload-section ${isCollapsed ? "collapsed" : "expanded"}`}>
                     <div className="upload-container">
                         <h2>Step 1: Upload Prompt File</h2>
@@ -310,21 +322,6 @@ const ProjectPage = () => {
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </div>
-
-                <div className="download-section">
-                    <h2>Download Word Files</h2>
-
-                    {/* ✅ Show ZIP icon only if files exist */}
-                    {hasResponses ? (
-                        <div className="zip-download-icon" onClick={handleDownloadAll} title="Download all as ZIP">
-                            <FontAwesomeIcon icon={faFileArchive} size="3x" style={{ color: "#00bfff" }} />
-                        </div>
-                    ) : (
-                        <p>No files available for download.</p>
-                    )}
-                </div>
-
-
             </div>
         </div>
     );
