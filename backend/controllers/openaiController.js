@@ -60,10 +60,18 @@ exports.generateResponses = async (req, res) => {
             let index = 1;
             for (const prompt of filledPrompts) {
                 try {
-                    const aiResponse = await callOpenAIWithTimeout(prompt);
+                    // Enhance the prompt with better context and structure
+                    const enhancedPrompt = `Please provide a comprehensive and detailed response to the following request. 
+
+REQUEST: ${prompt}
+
+Please ensure your response is well-structured, informative, and uses the most current information available.`;
+
+                    const aiResponse = await callOpenAIWithTimeout(enhancedPrompt);
                     const rawResponseText = aiResponse?.choices?.[0]?.message?.content?.trim() || 'No response';
                     paragraphs.push(...createFormattedParagraphs(index, rawResponseText));
                 } catch (error) {
+                    console.error(`Error generating response for prompt ${index}:`, error);
                     paragraphs.push(
                         new Paragraph({
                             children: [
