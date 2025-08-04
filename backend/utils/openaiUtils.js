@@ -101,7 +101,6 @@ Format your response with proper structure, clear headings, and easy-to-follow o
             response_format: { type: "text" }, // Ensure text format
             seed: null, // Allow for fresh responses each time
             logprobs: false, // Disable for better performance
-            echo: false, // Don't echo the prompt
         }),
         new Promise((_, reject) =>
             setTimeout(() => reject(new Error("OpenAI request timed out")), timeout)
